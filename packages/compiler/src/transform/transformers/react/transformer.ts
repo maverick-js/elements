@@ -1,13 +1,22 @@
 import { isArray } from '@maverick-js/std';
 import {
   $,
-  replaceTsNodes,
+  addStatementsToBlock,
+  type BlockUpdate,
+  isJsxRootNode,
+  replaceTsNode,
   resetUniqueIdCount,
   splitImportsAndBody,
-  type TsNodeMap,
+  transformTsNode,
+  updateBlock,
 } from '@maverick-js/ts';
 import ts from 'typescript';
 
+import {
+  isMaverickCoreImportDeclaration,
+  removeVirtualComponentImports,
+} from '../../../parse/analysis';
+import { parse } from '../../../parse/parse';
 import { createDelegateEventsStatement } from '../dom/transformer';
 import type { Transform, TransformData } from '../transformer';
 import { ReactTransformState } from './state';
@@ -29,49 +38,83 @@ export function createReactTransform(options?: ReactTransformOptions): Transform
 }
 
 export function reactTransform(
-  { sourceFile, nodes, ctx }: TransformData,
+  { sourceFile }: TransformData,
   { delegateEvents }: ReactTransformOptions = {},
 ) {
-  const state = new ReactTransformState(null),
-    replace: TsNodeMap = new Map();
+  let state = new ReactTransformState(null),
+    seenImports = false,
+    blocks: BlockUpdate[][] = [];
 
-  for (const node of nodes) {
-    let result = transform(node, state.child(node)),
-      parentNode = node.node.parent;
+  function visit(this: ts.TransformationContext, node: ts.Node) {
+    if (!seenImports && isMaverickCoreImportDeclaration(node)) {
+      seenImports = true;
+      return removeVirtualComponentImports(node, (name) => state.runtime.add(name));
+    } else if (ts.isBlock(node) || ts.isModuleBlock(node)) {
+      const updates: BlockUpdate[] = [];
 
-    if (ts.isParenthesizedExpression(parentNode)) {
-      parentNode = parentNode.parent;
-    }
+      blocks.push(updates);
+      const block = ts.visitEachChild(node, visit, this);
+      blocks.pop();
 
-    let isReturned = ts.isReturnStatement(parentNode),
-      isStatementChild = ts.isStatement(parentNode),
-      shouldReplaceParent = (isReturned || isStatementChild) && isArray(result),
-      replaceNode = shouldReplaceParent ? parentNode : node.node;
+      return updateBlock(block, updates);
+    } else if (isJsxRootNode(node)) {
+      const ast = parse(node),
+        result = ast ? transform(ast, state.child(ast)) : $.null,
+        currentBlock = blocks.at(-1);
 
-    if (isReturned && isArray(result)) {
-      const lastNode = result[result.length - 1];
-      if (lastNode && ts.isExpression(lastNode)) {
-        result[result.length - 1] = $.createReturnStatement(lastNode);
+      resetUniqueIdCount();
+
+      if (currentBlock) {
+        if (isArray(result)) {
+          const statements = result.slice(0, -1);
+
+          currentBlock.push({
+            type: 'add',
+            statements,
+            before: node,
+          });
+
+          currentBlock.push({
+            type: 'replace',
+            old: node,
+            new: result.at(-1)!,
+          });
+        } else {
+          currentBlock.push({
+            type: 'replace',
+            old: node,
+            new: result,
+          });
+        }
+
+        // Return original block and transform above.
+        return node;
       }
+
+      if (isArray(result)) {
+        const render = result.at(-1)!;
+
+        if (ts.isExpression(render)) {
+          result[result.length - 1] = $.createReturnStatement(render);
+        }
+
+        return $.selfInvokedFn(result);
+      }
+
+      return result;
     }
 
-    replace.set(replaceNode, result);
-
-    resetUniqueIdCount();
+    return ts.visitEachChild(node, visit, this);
   }
 
-  const { imports, body } = splitImportsAndBody(sourceFile);
+  const transformedSourceFile = transformTsNode(sourceFile, (ctx) => visit.bind(ctx)),
+    { imports, body } = splitImportsAndBody(transformedSourceFile);
 
   if (delegateEvents && state.delegatedEvents.size > 0) {
     body.push(createDelegateEventsStatement(state.delegatedEvents, state.domRuntime));
   }
 
   const statements: ts.Statement[] = [];
-
-  const components = ctx.analysis.components;
-  for (const component of Object.keys(components)) {
-    if (components[component]) state.runtime.add(component);
-  }
 
   const runtimes = [state.runtime, state.domRuntime];
   for (const runtime of runtimes) {
@@ -84,8 +127,10 @@ export function reactTransform(
     statements.push(state.module.vars.toStatement());
   }
 
-  return replaceTsNodes(
-    $.updateSourceFile(sourceFile, [...imports, ...statements, ...state.module.block, ...body]),
-    replace,
-  );
+  return $.updateSourceFile(sourceFile, [
+    ...imports,
+    ...statements,
+    ...state.module.block,
+    ...body,
+  ]);
 }

@@ -1,20 +1,20 @@
 import { type Dispose, onDispose } from '@maverick-js/signals';
 import { anySignal, MaverickEventTarget, noop } from '@maverick-js/std';
 
-import type { Component } from './component';
+import type { Component, ResolveMetaEvents } from './component';
 import type { ViewController } from './controller';
 import type { TargetedEventHandler } from './types';
 
 export type InferEvents<Target> =
-  Target extends Component<any, any, infer Events>
-    ? Events
+  Target extends Component<infer Meta>
+    ? ResolveMetaEvents<Meta>
     : Target extends ViewController<any, any, infer Events>
       ? Events
       : Target extends MaverickEventTarget<infer Events>
         ? Events extends {}
           ? Events
           : HTMLElementEventMap
-        : Target extends { $ts__events?: infer Events }
+        : Target extends { $$ts__events?: infer Events }
           ? Events extends {}
             ? Events
             : HTMLElementEventMap

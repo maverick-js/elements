@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`multiple spreads 1`] = `"<!$><div data-maverick="" class="zux hux foo" style="z-index: 10;--color: red;--bgColor: red;"></div>"`;
+
+exports[`one spread 1`] = `"<!$><div data-maverick="" class="boo foo" style="--color: blue;"></div>"`;

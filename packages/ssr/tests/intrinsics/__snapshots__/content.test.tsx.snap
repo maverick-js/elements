@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dynamic 1`] = `"<!$><div><span>Hello</span></div>"`;
+
+exports[`signal 1`] = `"<!$><div><span>Yes</span></div>"`;
+
+exports[`signal 2`] = `"<!$><div>No</div>"`;
+
+exports[`static 1`] = `"<div><span>Hello</span></div>"`;

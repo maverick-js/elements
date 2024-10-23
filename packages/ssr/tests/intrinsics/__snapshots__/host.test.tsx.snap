@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`<Host> 1`] = `"<!$><div data-foo="" data-maverick="" class="foo bar" style="--foo: 10;"><span>Contents</span></div>"`;
+
+exports[`attach to host 1`] = `"<!$><div data-maverick="" class="foo bar hux" style="background-color: red;--foo: 10;"><span>Contents</span></div>"`;

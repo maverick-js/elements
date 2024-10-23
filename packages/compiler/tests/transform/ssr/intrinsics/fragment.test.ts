@@ -67,12 +67,14 @@ import { Fragment } from "@maverick-js/core";
 <Fragment slot="apples">
   <div></div>
   <span></span>
+  {() => <div />}
 </Fragment>
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_create_component, Fragment } from "@maverick-js/ssr";
+    "import { Fragment, $$_ssr, $$_create_component } from "@maverick-js/ssr";
+    let $$_template_1 = ["<div></div><span></span>"];
     $$_create_component(Fragment, null, {
-        "default": () => "<div></div><span></span>"
+        "default": () => $$_ssr($$_template_1, [() => "<div></div>"])
     });
     "
   `);

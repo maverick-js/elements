@@ -11,7 +11,8 @@ afterEach(() => {
 function create(name: string, dispose: () => void) {
   return class extends Component {
     static element: CustomElementOptions = {
-      name,
+      name: name,
+      fallbackTag: 'div',
     };
     constructor() {
       super();

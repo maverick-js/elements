@@ -6,11 +6,9 @@ import {
   mapLogLevelStringToNumber,
   setGlobalLogLevel,
 } from '@maverick-js/logger';
-import { removeImports } from '@maverick-js/ts';
 import { relative } from 'pathe';
+import ts from 'typescript';
 
-import type { ParseAnalysis } from '../parse/analysis';
-import { parse } from '../parse/parse';
 import { printFile } from './print';
 import type { Transform } from './transformers/transformer';
 
@@ -21,10 +19,11 @@ export interface TransformOptions {
 }
 
 export interface TransformContext {
-  readonly analysis: Readonly<ParseAnalysis>;
   /** User provided transform options. */
   readonly options: Readonly<TransformOptions>;
 }
+
+const tsxRE = /\.tsx/;
 
 export function transform(source: string, options: TransformOptions) {
   const { transform, logLevel = 'warn', filename } = options;
@@ -35,24 +34,14 @@ export function transform(source: string, options: TransformOptions) {
   log(options, LogLevel.Verbose);
 
   // Build AST
-  let astStartTime = process.hrtime(),
-    { analysis, sourceFile, nodes } = parse(source, options);
-
-  logTime({ message: 'Built AST', startTime: astStartTime }, LogLevel.Info);
-
-  const virtualImports = Object.values(analysis.components);
-  if (virtualImports.length > 0) {
-    sourceFile = removeImports(sourceFile, '@maverick-js/core', virtualImports);
-  }
-
   const ctx: TransformContext = {
-    analysis,
     options,
   };
 
   // Transform JSX
-  const transformStartTime = process.hrtime(),
-    transformedFile = transform({ sourceFile, nodes, ctx });
+  const sourceFile = ts.createSourceFile(filename, source, 99, true, tsxRE.test(filename) ? 4 : 2),
+    transformStartTime = process.hrtime(),
+    transformedFile = transform({ sourceFile, ctx });
 
   logTime({ message: `Transformed AST`, startTime: transformStartTime }, LogLevel.Info);
 

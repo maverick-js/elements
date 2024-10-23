@@ -15,7 +15,7 @@ import {
   type SetupCallback,
 } from './lifecycle';
 import { createScope, getScope, onDispose, root, type Scope, scoped, signal } from './signals';
-import { State as StateFactory } from './state';
+import { StoreFactory } from './store';
 import { ON_DISPATCH_SYMBOL } from './symbols';
 import type { SignalOrValueRecord, WriteSignalRecord } from './types';
 
@@ -47,26 +47,26 @@ export class Instance<Props = {}, State = {}> {
   props: WriteSignalRecord<Props> = EMPTY_PROPS;
 
   state!: Readonly<State>;
-  $state!: any;
+  store!: any;
 
   [SETUP_SYMBOL]: SetupCallback[] = [];
   [ATTACH_SYMBOL]: AttachCallback[] = [];
   [CONNECT_SYMBOL]: ConnectCallback[] = [];
   [DESTROY_SYMBOL]: DestroyCallback[] = [];
 
-  constructor(scope: Scope, props: Props, state?: StateFactory<State>, init?: InstanceInit<Props>) {
+  constructor(scope: Scope, props: Props, store?: StoreFactory<State>, init?: InstanceInit<Props>) {
     this.scope = scope;
 
     if (init?.scope) init.scope.append(scope);
 
-    if (state) {
-      this.$state = state.create();
+    if (store) {
+      this.store = store.create();
 
-      this.state = new Proxy(this.$state, {
-        get: (_, prop: string) => this.$state[prop](),
+      this.state = new Proxy(this.store, {
+        get: (_, prop: string) => this.store[prop](),
       }) as State;
 
-      provideContext(state, this.$state);
+      provideContext(store, this.store);
     }
 
     if (props) {
@@ -103,10 +103,6 @@ export class Instance<Props = {}, State = {}> {
 
     this.host = host;
     this.$host.set(host);
-
-    if (__DEV__) {
-      (host as any).$$COMPONENT_NAME = this.component?.constructor.name;
-    }
 
     scoped(() => {
       this.attachScope = createScope();
@@ -187,7 +183,7 @@ export class Instance<Props = {}, State = {}> {
     this.props = EMPTY_PROPS;
     this.scope = null;
     this.state = EMPTY_PROPS;
-    this.$state = null;
+    this.store = null;
 
     // @ts-expect-error
     if (host) delete host.$;

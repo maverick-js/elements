@@ -1,4 +1,11 @@
-import { Component, Host, type JSX, signal, tick } from '@maverick-js/core';
+import {
+  Component,
+  type CustomElementOptions,
+  Host,
+  type JSX,
+  signal,
+  tick,
+} from '@maverick-js/core';
 import { render } from '@maverick-js/dom';
 import type { MaverickEvent } from '@maverick-js/std';
 
@@ -12,9 +19,14 @@ test('<Host>', () => {
   const onClick = vi.fn();
 
   class Foo extends Component {
+    static element: CustomElementOptions = {
+      name: 'mk-foo',
+      fallbackTag: 'div',
+    };
+
     override render(): JSX.Element {
       return (
-        <Host class="foo" as="div" data-foo class:bar var:foo={10} on:click={onClick}>
+        <Host class="foo" data-foo class:bar var:foo={10} on:click={onClick}>
           <span>Contents</span>
         </Host>
       );
@@ -37,10 +49,22 @@ test('attach to host', () => {
     onClick = vi.fn(),
     ref = vi.fn();
 
-  class Foo extends Component<{}, {}, { click: MaverickEvent<void> }, { foo: number }> {
+  class Foo extends Component<{
+    events: {
+      click: MaverickEvent<void>;
+    };
+    cssProps: {
+      foo: number;
+    };
+  }> {
+    static element: CustomElementOptions = {
+      name: 'mk-foo',
+      fallbackTag: 'div',
+    };
+
     override render(): JSX.Element {
       return (
-        <Host class="foo" on:click={() => this.dispatch('click')} as="div">
+        <Host class="foo" on:click={() => this.dispatch('click')}>
           <span>Contents</span>
         </Host>
       );

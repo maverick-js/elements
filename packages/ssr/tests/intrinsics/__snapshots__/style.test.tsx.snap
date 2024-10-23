@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dynamic 1`] = `"<!$><div style="color: blue;background-color: red;"></div>"`;
+
+exports[`signal 1`] = `"<!$><div style="color: blue;"></div>"`;
+
+exports[`static 1`] = `"<div style="color: blue;"></div>"`;
+
+exports[`with dynamic base 1`] = `"<!$><div style="background-color: pink;color: red;"></div>"`;
+
+exports[`with signal base 1`] = `"<!$><div style="background-color: red;color: red;"></div>"`;

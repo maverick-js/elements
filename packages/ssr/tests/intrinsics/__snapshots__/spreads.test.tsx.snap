@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`multiple spreads 1`] = `"<!$><div data-foo="" data-bar="" class="bar bux foo hux" style="--foo: 10;color: var(--color);--color: red;background-color: red;"></div>"`;
+
+exports[`one spread 1`] = `"<!$><div data-foo="" class="foo" style="color: var(--color);--color: blue;"></div>"`;

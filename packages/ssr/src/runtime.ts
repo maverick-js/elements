@@ -1,14 +1,15 @@
 import {
+  $$_current_host_component,
   $$_current_slots,
+  $$_priority_attach,
+  $$_set_current_host_component,
   $$_set_current_slots,
+  type AnyComponent,
   type ComponentConstructor,
   createComponent,
-  CUSTOM_ELEMENT_SYMBOL,
-  type CustomElementOptions,
   type FunctionComponent,
   isComponentConstructor,
-  type JSX,
-  scoped,
+  RENDER_SYMBOL,
 } from '@maverick-js/core';
 import {
   camelToKebabCase,
@@ -17,12 +18,15 @@ import {
   isFunction,
   isNumber,
   isString,
-  unwrap,
   unwrapDeep,
 } from '@maverick-js/std';
 
+import type { HostComponentAttrs } from './components/host';
+import type { ServerElement } from './element/server-element';
 import { ServerStyleDeclaration } from './element/server-style-declaration';
 import { ServerTokenList } from './element/server-token-list';
+
+let $$_last_ssr = '';
 
 /** @internal */
 export function $$_ssr(template: string[], values: any[]) {
@@ -30,22 +34,28 @@ export function $$_ssr(template: string[], values: any[]) {
 
   for (let i = 0; i < template.length; i++) {
     result += template[i];
-    result += resolve(values[i]);
+    result += $$_resolve_value(values[i]);
   }
 
-  return result;
+  return ($$_last_ssr = result);
 }
 
-function resolve(node: unknown): string {
-  if (isString(node) || isNumber(node)) {
-    return node + '';
-  } else if (isFunction(node)) {
-    return resolve(node());
-  } else if (isArray(node)) {
-    return node.flat(10).map(resolve) + '<!/[]>';
+/** @internal */
+export function $$_resolve_value(value: unknown): string {
+  if (isString(value) || isNumber(value)) {
+    return value + '';
+  } else if (isFunction(value)) {
+    return $$_resolve_value(value());
+  } else if (isArray(value)) {
+    return $$_resolve_array(value) + '<!/[]>';
   } else {
     return '';
   }
+}
+
+/** @internal */
+export function $$_resolve_array(values: unknown[]) {
+  return values.flat(10).map($$_resolve_value).join('');
 }
 
 /** @internal */
@@ -53,9 +63,9 @@ export function $$_attrs(attrs: Record<string, unknown>) {
   let result = '';
 
   for (const name of Object.keys(attrs)) {
-    const value = unwrap(attrs[name]);
+    const value = unwrapDeep(attrs[name]);
     if (!value && value !== '' && value !== 0) continue;
-    result += ' ' + name + attrs[name];
+    result += ' ' + name + '=' + '"' + value + '"';
   }
 
   return result;
@@ -69,12 +79,16 @@ export function $$_class(base: unknown, props: Record<string, unknown>) {
     classList.parse(base);
   }
 
+  $$_class_props(classList, props);
+
+  return classList.toString();
+}
+
+function $$_class_props(classList: ServerTokenList, props: Record<string, unknown>) {
   for (const name of Object.keys(props)) {
     const value = unwrapDeep(props[name]);
     classList[value ? 'add' : 'remove'](name);
   }
-
-  return classList.toString();
 }
 
 /** @internal */
@@ -85,71 +99,81 @@ export function $$_style(base: unknown, props: Record<string, unknown>) {
     styles.parse(base);
   }
 
-  for (const prop of Object.keys(props)) {
-    const value = unwrapDeep(props[prop]);
-    if (!value && value !== 0) continue;
-    styles.setProperty(prop, value + '');
-  }
+  $$_style_props(styles, props);
 
   return styles.toString();
 }
 
-/** @internal */
-export let $$_current_custom_element: CustomElementOptions | null = null;
+function $$_style_props(styles: ServerStyleDeclaration, props: Record<string, unknown>) {
+  for (const prop of Object.keys(props)) {
+    const value = unwrapDeep(props[prop]);
+    if (!value && value !== 0) continue;
+    styles.setProperty(prop, escapeHTML(value + ''));
+  }
+}
 
 /** @internal */
 export const $$_slot_stack: Array<Record<string, any> | null> = [];
+
+/** @internal */
+export const $$_host_stack: Array<AnyComponent | null> = [];
 
 /** @internal */
 export function $$_create_component(
   Component: FunctionComponent | ComponentConstructor,
   props: Record<string, any> | null = null,
   slots: Record<string, any> | null = null,
-  attrs: {
-    class?: string;
-    $class?: Record<string, JSX.ClassValue>;
-    $var?: Record<string, JSX.CSSValue>;
-  } | null = null,
+  attrs: HostComponentAttrs | null = null,
 ) {
   try {
     $$_slot_stack.push($$_current_slots);
     $$_set_current_slots(slots ?? {});
 
     if (isComponentConstructor(Component)) {
-      const component = createComponent(Component, { props });
+      try {
+        $$_host_stack.push($$_current_host_component);
 
-      if (CUSTOM_ELEMENT_SYMBOL in Component && Component.element) {
-        $$_current_custom_element = Component.element;
-        // TODO: we need to map props to attributes
+        const component = createComponent(Component, { props });
+        $$_set_current_host_component(component);
+
+        component.$$.setup();
+
+        if (attrs) {
+          $$_priority_attach(component, createAttrsCallback(attrs));
+        }
+
+        return $$_resolve_value(component[RENDER_SYMBOL]());
+      } finally {
+        $$_set_current_host_component($$_host_stack.pop()!);
       }
-
-      component.$$.setup();
-
-      const result = component.render
-        ? scoped(() => component!.render!(), component.$$.scope)
-        : null;
-
-      // TODO: how to deal with this??
-      // instance attach
-
-      if (attrs) {
-        // TODO: attach attrs
-      }
-
-      return result;
     } else {
-      let result = Component(props ?? {});
-
-      if (attrs) {
-        // TODO: attach attrs
+      if ($$_current_host_component && attrs) {
+        $$_priority_attach($$_current_host_component, createAttrsCallback(attrs));
       }
 
-      return result;
+      return $$_resolve_value(Component(props ?? {}));
     }
   } finally {
-    $$_current_custom_element = null;
     $$_set_current_slots($$_slot_stack.pop()!);
   }
+}
+
+function createAttrsCallback(attrs: HostComponentAttrs) {
+  return (host: HTMLElement) => {
+    const $$host = host as unknown as ServerElement;
+
+    if (attrs.class) {
+      $$host.classList.parse(attrs.class);
+    }
+
+    if (attrs.$class) {
+      $$_class_props($$host.classList, attrs.$class);
+    }
+
+    if (attrs.$var) {
+      $$_style_props($$host.style, attrs.$var);
+    }
+  };
 }
 
 /** @internal */
@@ -169,10 +193,18 @@ export const $$_signal_name_re = /* #__PURE__ */ /^\$/;
 
 /** @internal */
 export function $$_merge_attrs(...sources: Record<string, unknown>[]) {
-  let { class: _class, style, ...props } = $$_merge_props(...sources),
+  let {
+      class: _class,
+      $class: _$class,
+      style: _style,
+      $style: _$style,
+      ...props
+    } = $$_merge_props(...sources),
     $class: Record<string, unknown> | null = null,
     $style: Record<string, unknown> | null = null,
     attrs: Record<string, unknown> = {},
+    baseClass = unwrapDeep(_class ?? _$class),
+    baseStyle = unwrapDeep(_style ?? _$style),
     colonIndex = -1;
 
   for (let name of Object.keys(props)) {
@@ -187,7 +219,7 @@ export function $$_merge_attrs(...sources: Record<string, unknown>[]) {
       if (namespace === 'class') {
         ($class ??= {})[prop] = value;
       } else if (namespace === 'style') {
-        ($style ??= {})[camelToKebabCase(name)] = value;
+        ($style ??= {})[camelToKebabCase(prop)] = value;
       } else if (namespace === 'var') {
         ($style ??= {})[`--${prop}`] = value;
       }
@@ -196,8 +228,8 @@ export function $$_merge_attrs(...sources: Record<string, unknown>[]) {
     }
   }
 
-  attrs.class = $class ? $$_class(_class, $class) : _class;
-  attrs.styles = $style ? $$_style(style, $style) : style;
+  attrs.class = $class ? $$_class(baseClass, $class) : baseClass;
+  attrs.style = $style ? $$_style(baseStyle, $style) : baseStyle;
 
   return $$_attrs(attrs);
 }
@@ -227,7 +259,7 @@ export function $$_merge_host_attrs(...sources: Record<string, unknown>[]) {
     if (namespace === 'class') {
       (attrs.$class ??= {})[prop] = value;
     } else if (namespace === 'var') {
-      (attrs.$var ??= {})[prop] = value;
+      (attrs.$var ??= {})[`--${prop}`] = value;
     }
   }
 
@@ -235,4 +267,10 @@ export function $$_merge_host_attrs(...sources: Record<string, unknown>[]) {
 }
 
 /** @internal */
-export const $$_escape = escapeHTML;
+export function $$_escape(value: any, isAttr = false) {
+  if (!isAttr && isString(value) && value === $$_last_ssr) return value;
+  return escapeHTML(value, isAttr);
+}
+
+/** @internal */
+export const $$_unwrap = unwrapDeep;

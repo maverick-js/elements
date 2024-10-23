@@ -139,7 +139,7 @@ import { Fragment } from "@maverick-js/core";
 </Fragment>
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_create_walker, $$_create_component, Fragment, $$_create_template } from "@maverick-js/dom";
+    "import { Fragment, $$_create_walker, $$_create_component, $$_create_template } from "@maverick-js/dom";
     let $_template_1 = /* @__PURE__ */ $$_create_template("<!$><div></div>"), $_template_2 = /* @__PURE__ */ $$_create_template("<!$><span></span>");
     function $$_render_1() {
         let [$_root_1, $_walker_1] = $$_create_walker($_template_1);

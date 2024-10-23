@@ -118,29 +118,30 @@ function resolveArray(
 ): boolean {
   let value: JSX.Element,
     old,
-    effect = false;
+    isReactive = false;
 
   for (let i = 0; i < newNodes.length; i++) {
     (value = newNodes[i]), (old = oldNodes[i]);
     if (isDOMNode(value)) {
       currentNodes.push(value);
     } else if (isArray(value)) {
-      effect =
-        resolveArray(currentNodes, value, (isArray(old) ? old : []) as Node[], computed) || effect;
+      isReactive =
+        resolveArray(currentNodes, value, (isArray(old) ? old : []) as Node[], computed) ||
+        isReactive;
     } else if (isFunction(value)) {
       if (computed) {
         value = value();
-        effect =
+        isReactive =
           resolveArray(
             currentNodes,
             isArray(value) ? value : [value],
             (isArray(old) ? old : [old]) as Node[],
             true,
-          ) || effect;
+          ) || isReactive;
       } else {
         // Pushing function here is fine as it'll be unwrapped in second pass inside effect.
         currentNodes.push(value as any);
-        effect = true;
+        isReactive = true;
       }
     } else if (value || value === 0) {
       const text = value + '';
@@ -152,7 +153,7 @@ function resolveArray(
     }
   }
 
-  return effect;
+  return isReactive;
 }
 
 const ARRAY_END_MARKER = '/[]';

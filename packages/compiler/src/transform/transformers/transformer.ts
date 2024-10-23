@@ -9,7 +9,6 @@ export interface Transform {
 
 export interface TransformData {
   sourceFile: ts.SourceFile;
-  nodes: AstNode[];
   ctx: TransformContext;
 }
 

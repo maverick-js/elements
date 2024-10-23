@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dynamic 1`] = `"<!$><div class="... foo"></div>"`;
+
+exports[`dynamic 2`] = `"<!$><div class="..."></div>"`;
+
+exports[`signal 1`] = `"<!$><div class="foo"></div>"`;
+
+exports[`signal 2`] = `"<!$><div class=""></div>"`;
+
+exports[`static 1`] = `"<div class="... foo"></div>"`;
+
+exports[`with dynamic base 1`] = `"<!$><div class="bar bux foo"></div>"`;
+
+exports[`with signal base 1`] = `"<!$><div class="bar bux foo"></div>"`;
+
+exports[`with signal base 2`] = `"<!$><div class="bar bux"></div>"`;

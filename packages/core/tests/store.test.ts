@@ -1,7 +1,7 @@
-import { State } from '@maverick-js/core';
+import { StoreFactory } from '@maverick-js/core';
 
-it('should create state', () => {
-  const factory = new State({
+it('should create store', () => {
+  const factory = new StoreFactory({
     a: 1,
     b: 2,
     get c() {

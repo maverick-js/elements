@@ -15,7 +15,11 @@ test('on', () => {
     foo: MaverickEvent<void>;
   }
 
-  class Foo extends Component<{}, {}, Events> {
+  interface FooMeta {
+    events: Events;
+  }
+
+  class Foo extends Component<FooMeta> {
     override render(): JSX.Element {
       return (
         <div

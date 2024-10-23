@@ -2,13 +2,18 @@ import {
   Component,
   createComponent,
   createScope,
+  createStore,
   Instance,
-  State,
-  useState,
+  useStore,
 } from '@maverick-js/core';
 
 it('should create props', () => {
-  class TestComponent extends Component<{ foo: number; bar: number }> {
+  class TestComponent extends Component<{
+    props: {
+      foo: number;
+      bar: number;
+    };
+  }> {
     static props = { foo: 10, bar: 20 };
   }
 
@@ -19,7 +24,12 @@ it('should create props', () => {
 });
 
 it('should forward props', () => {
-  class TestComponent extends Component<{ foo: number; bar: number }> {
+  class TestComponent extends Component<{
+    props: {
+      foo: number;
+      bar: number;
+    };
+  }> {
     static props = { foo: 10, bar: 20 };
   }
 
@@ -32,15 +42,21 @@ it('should forward props', () => {
 });
 
 it('should create state', () => {
-  const TestState = new State({ foo: 1 });
+  const TestStore = createStore({
+    foo: 1,
+  });
 
-  class TestComponent extends Component<{}, { foo: number }> {
-    static state = TestState;
+  class TestComponent extends Component<{
+    state: {
+      foo: number;
+    };
+  }> {
+    static state = TestStore;
 
     constructor() {
       super();
       expect(this.$state.foo()).toBe(1);
-      expect(useState(TestState)).toBeDefined();
+      expect(useStore(TestStore)).toBeDefined();
     }
   }
 

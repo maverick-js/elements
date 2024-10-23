@@ -10,7 +10,7 @@ import { Host } from '@maverick-js/core';
 </Host>
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_listen, $$_class, $$_style, $$_create_component, Host, $$_create_template } from "@maverick-js/dom";
+    "import { Host, $$_listen, $$_class, $$_style, $$_create_component, $$_create_template } from "@maverick-js/dom";
     let $_template_1 = /* @__PURE__ */ $$_create_template("<div>...</div>");
     function $$_render_1({ $1, $2, $3 }) {
         let $_component_1 = $$_create_component($3, {

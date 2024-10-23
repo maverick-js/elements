@@ -13,10 +13,10 @@ class Foo extends Component {
       { customElements: true },
     ),
   ).toMatchInlineSnapshot(`
-    "import { CUSTOM_ELEMENT_SYMBOL } from "@maverick-js/core";
+    "import { DEFINE_ELEMENT_SYMBOL } from "@maverick-js/core";
     import { Component } from '@maverick-js/core';
     class Foo extends Component {
-        static [CUSTOM_ELEMENT_SYMBOL]() {
+        static [DEFINE_ELEMENT_SYMBOL]() {
             return true;
         }
         static element = {

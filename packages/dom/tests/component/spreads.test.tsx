@@ -1,4 +1,11 @@
-import { Component, Host, type JSX, signal, tick } from '@maverick-js/core';
+import {
+  Component,
+  type CustomElementOptions,
+  Host,
+  type JSX,
+  signal,
+  tick,
+} from '@maverick-js/core';
 import { render } from '@maverick-js/dom';
 import type { MaverickEvent } from '@maverick-js/std';
 
@@ -17,9 +24,18 @@ test('one spread', () => {
     'on:click': onClick,
   };
 
-  class Foo extends Component<{}, {}, { click: MaverickEvent<void> }> {
+  class Foo extends Component<{
+    events: {
+      click: MaverickEvent<void>;
+    };
+  }> {
+    static element: CustomElementOptions = {
+      name: '',
+      fallbackTag: 'div',
+    };
+
     override render(): JSX.Element {
-      return <Host as="div" class="boo" on:click={() => this.dispatch('click')} />;
+      return <Host class="boo" on:click={() => this.dispatch('click')} />;
     }
   }
 
@@ -53,15 +69,20 @@ test('multiple spreads', () => {
     'on:pointerup': onPointerUp,
   };
 
-  class Foo extends Component<
-    {},
-    {},
-    { click: MaverickEvent<void>; pointerup: MaverickEvent<void> }
-  > {
+  class Foo extends Component<{
+    events: {
+      click: MaverickEvent<void>;
+      pointerup: MaverickEvent<void>;
+    };
+  }> {
+    static element: CustomElementOptions = {
+      name: '',
+      fallbackTag: 'div',
+    };
+
     override render(): JSX.Element {
       return (
         <Host
-          as="div"
           class="zux"
           style="z-index: 10;"
           on:click={() => this.dispatch('click')}

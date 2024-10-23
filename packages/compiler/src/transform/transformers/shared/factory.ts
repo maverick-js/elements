@@ -155,7 +155,7 @@ export function transformAstNodeChildren<Node extends AstNode, State>(
   transform: StateTransform<State>,
   nextState: NextState<State>,
 ): InferTsNode<Node> {
-  const map: TsNodeMap = new WeakMap();
+  const map: TsNodeMap = new Map();
 
   if ('children' in node && node.children) {
     for (const child of node.children) {

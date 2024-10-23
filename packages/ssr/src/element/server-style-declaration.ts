@@ -31,7 +31,7 @@ export class ServerStyleDeclaration {
     for (let i = 0; i < styles.length; i++) {
       if (styles[i] === '') continue;
       const [name, value] = styles[i].split(propRE);
-      this.setProperty(name, value);
+      if (name && value) this.setProperty(name, value);
     }
   }
 

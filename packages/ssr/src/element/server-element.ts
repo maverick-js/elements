@@ -1,10 +1,16 @@
-import { type AnyComponent, scoped, SETUP_SYMBOL } from '@maverick-js/core';
+import { type AnyComponent, scoped } from '@maverick-js/core';
 import { ServerAttributes, ServerStyleDeclaration, ServerTokenList } from '@maverick-js/ssr';
 import { noop } from '@maverick-js/std';
 
 export class ServerElement<T extends AnyComponent = AnyComponent> implements HTMLServerElement {
   keepAlive = false;
   forwardKeepAlive = true;
+
+  readonly tagName: string;
+
+  get localName() {
+    return this.tagName.toLowerCase();
+  }
 
   readonly $: T;
   readonly attributes = new ServerAttributes();
@@ -16,14 +22,15 @@ export class ServerElement<T extends AnyComponent = AnyComponent> implements HTM
   }
 
   get $state() {
-    return this.$.$$.$state;
+    return this.$.$$.store;
   }
 
   get state() {
     return this.$.state;
   }
 
-  constructor(component: T) {
+  constructor(tagName: string, component: T) {
+    this.tagName = tagName.toUpperCase();
     this.$ = component;
   }
 
@@ -71,7 +78,6 @@ export class ServerElement<T extends AnyComponent = AnyComponent> implements HTM
     return this.attributes.removeAttribute(name);
   }
 
-  [SETUP_SYMBOL]() {}
   addEventListener() {}
   removeEventListener() {}
 
@@ -91,6 +97,8 @@ export class ServerElement<T extends AnyComponent = AnyComponent> implements HTM
 export interface HTMLServerElement
   extends Pick<
     HTMLElement,
+    | 'tagName'
+    | 'localName'
     | 'getAttribute'
     | 'setAttribute'
     | 'hasAttribute'

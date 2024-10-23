@@ -61,11 +61,17 @@ test('one dynamic child expression', () => {
 
 test('multiple dynamic child expressions', () => {
   expect(
-    ssr(`<div>{a() ? <div on:click={onA} /> : null}{b() ? <span on:click={onB} /> : null}</div>`),
+    ssr(
+      `
+<div>
+  {() => (a() ? <div on:click={onA} /> : c())}
+  {() => (b() ? <span on:click={onB} /> : d())}
+</div>`,
+    ),
   ).toMatchInlineSnapshot(`
-    "import { $$_ssr } from "@maverick-js/ssr";
+    "import { $$_escape, $$_ssr } from "@maverick-js/ssr";
     let $$_template_1 = ["<div><!$>", "<!$>", "</div>"];
-    $$_ssr($$_template_1, [a() ? "<!$><div></div>" : null, b() ? "<!$><span></span>" : null]);
+    $$_ssr($$_template_1, [() => (a() ? "<!$><div></div>" : $$_escape(c())), () => (b() ? "<!$><span></span>" : $$_escape(d()))]);
     "
   `);
 });

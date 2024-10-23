@@ -14,8 +14,8 @@ import {
   type TextNode,
 } from './ast';
 import { RESERVED_ATTR_NAMESPACE, RESERVED_NAMESPACE } from './constants';
-import { createAstNode } from './create-ast';
 import type { JsxAttrNamespace, JsxEventNamespace, JsxNamespace } from './jsx';
+import { parse } from './parse';
 
 export function isValidAttrNamespace(namespace: any): namespace is JsxAttrNamespace {
   return RESERVED_ATTR_NAMESPACE.has(namespace);
@@ -31,25 +31,19 @@ export function isValidEventNamespace(namespace: string): namespace is JsxEventN
 }
 
 export function getExpressionChildren(expression: ts.Expression) {
-  let children: AstNode[] | undefined;
+  const children: AstNode[] = [];
+  visitExpression(expression, children);
+  return children.length > 0 ? children : null;
+}
 
-  const parse = (node: ts.Node) => {
-    if (isJsxElementNode(node) || ts.isJsxFragment(node)) {
-      if (!children) children = [];
-      children!.push(createAstNode(node));
-      return;
-    }
-
-    ts.forEachChild(node, parse);
-  };
-
-  if (isJsxElementNode(expression) || ts.isJsxFragment(expression)) {
-    children = [createAstNode(expression)];
-  } else {
-    ts.forEachChild(expression, parse);
+function visitExpression(node: ts.Node, children: AstNode[]) {
+  if (isJsxElementNode(node) || ts.isJsxFragment(node)) {
+    const ast = parse(node);
+    if (ast) children.push(ast);
+    return;
   }
 
-  return children;
+  ts.forEachChild(node, (node) => visitExpression(node, children));
 }
 
 export function filterElementNodes(children: AstNode[]) {

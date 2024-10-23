@@ -387,6 +387,9 @@ importers:
       '@rollup/plugin-node-resolve':
         specifier: ^15.3.0
         version: 15.3.0(rollup@4.24.0)
+      esbuild:
+        specifier: ^0.19.12
+        version: 0.19.12
       rimraf:
         specifier: ^5.0.10
         version: 5.0.10

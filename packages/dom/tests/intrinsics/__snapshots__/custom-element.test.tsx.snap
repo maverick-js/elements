@@ -10,12 +10,14 @@ exports[`render 1`] = `
 
   <mk-foo
     data-foo=""
+    data-maverick=""
   >
     <div>
       Foo Content
     </div>
     <mk-bar
       data-bar=""
+      data-maverick=""
     >
       <div>
         Bar Content

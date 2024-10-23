@@ -21,6 +21,7 @@ it('should handle basic setup and destroy', () => {
   class TestComponent extends Component {
     static element: CustomElementOptions = {
       name: 'mk-test-1',
+      fallbackTag: 'div',
     };
   }
 
@@ -41,9 +42,10 @@ it('should observe attributes', () => {
     bazBaxHux: number;
   }
 
-  class TestComponent extends Component<Props> {
+  class TestComponent extends Component<{ props: Props }> {
     static element: CustomElementOptions = {
       name: 'mk-test-2',
+      fallbackTag: 'div',
     };
 
     static props: Props = {
@@ -82,6 +84,7 @@ it('should call lifecycle hooks', async () => {
   class TestComponent extends Component {
     static element: CustomElementOptions = {
       name: 'mk-test-3',
+      fallbackTag: 'div',
     };
 
     constructor() {

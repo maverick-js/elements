@@ -23,8 +23,9 @@
     "bundle": "rollup -c",
     "clean": "rimraf dist-npm",
     "types": "tsc -p tsconfig.build.json",
-    "test": "pnpm test:client",
-    "test:watch": "vitest --watch",
+    "test:pre": "node .scripts/test-pre.js",
+    "test": "pnpm test:pre && vitest -c vite.config.js --run",
+    "test:watch": "pnpm test:pre && vitest -c vite.config.js --watch",
     "format": "prettier src --write --loglevel warn"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "@maverick-js/core": "workspace:*",
     "@maverick-js/element": "workspace:*",
     "@rollup/plugin-node-resolve": "^15.3.0",
+    "esbuild": "^0.19.12",
     "rimraf": "^5.0.10",
     "rollup": "^4.24.0",
     "rollup-plugin-dts": "^6.1.1",

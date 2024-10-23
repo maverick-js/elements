@@ -12,14 +12,14 @@ export interface MaverickElementConstructor<T extends Component = AnyComponent> 
   new (): MaverickElement<T>;
 }
 
-export type MaverickElement<T extends Component = AnyComponent, E = InferComponentEvents<T>> = Omit<
-  MaverickCustomElement<T>,
-  'addEventListener' | 'removeEventListener'
-> &
+export type MaverickElement<
+  T extends Component = AnyComponent,
+  Events = InferComponentEvents<T>,
+> = Omit<MaverickCustomElement<T>, 'addEventListener' | 'removeEventListener'> &
   InferComponentMembers<T> & {
-    addEventListener<K extends keyof E>(
+    addEventListener<K extends keyof Events>(
       type: K,
-      listener: (this: HTMLElement, ev: E[K]) => any,
+      listener: (this: HTMLElement, ev: Events[K]) => any,
       options?: boolean | AddEventListenerOptions,
     ): void;
     addEventListener<K extends keyof HTMLElementEventMap>(
@@ -32,9 +32,9 @@ export type MaverickElement<T extends Component = AnyComponent, E = InferCompone
       listener: EventListenerOrEventListenerObject,
       options?: boolean | AddEventListenerOptions,
     ): void;
-    removeEventListener<K extends keyof E>(
+    removeEventListener<K extends keyof Events>(
       type: K,
-      listener: (this: HTMLElement, ev: E[K]) => any,
+      listener: (this: HTMLElement, ev: Events[K]) => any,
       options?: boolean | EventListenerOptions,
     ): void;
     removeEventListener<K extends keyof HTMLElementEventMap>(

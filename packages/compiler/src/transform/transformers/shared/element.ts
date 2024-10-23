@@ -47,15 +47,15 @@ export function setupCustomElements(
   return sourceFile;
 }
 
-const CUSTOM_ELEMENT_SYMBOL_NAME = 'CUSTOM_ELEMENT_SYMBOL';
+const DEFINE_ELEMENT_SYMBOL_NAME = 'DEFINE_ELEMENT_SYMBOL';
 
 function createCustomElementSymbolImport() {
-  return createImports([$.id(CUSTOM_ELEMENT_SYMBOL_NAME)], '@maverick-js/core');
+  return createImports([$.id(DEFINE_ELEMENT_SYMBOL_NAME)], '@maverick-js/core');
 }
 
 function createStaticElementRegistration(registration: ts.Expression) {
   return createStaticComputedMethod(
-    $.id(CUSTOM_ELEMENT_SYMBOL_NAME),
+    $.id(DEFINE_ELEMENT_SYMBOL_NAME),
     [],
     [$.createReturnStatement(registration)],
   );

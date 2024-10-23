@@ -64,3 +64,29 @@ export function omit<T, R extends keyof T>(source: T, props: R[]): Simplify<Omit
     keysOf(source).filter((key) => !props.includes(key as R)),
   );
 }
+
+/**
+ * Walks the entire prototype chain and collects all properties, getters, setters, and methods.
+ */
+export function walkPrototypeChain(
+  ctor: Function,
+  stopWalk?: (proto: object) => boolean,
+): Map<string, PropertyDescriptor> {
+  let proto = ctor.prototype,
+    result = new Map<string, PropertyDescriptor>();
+
+  // Walk the prototype chain until null (the end of the chain)
+  while (proto !== null && !stopWalk?.(proto)) {
+    const names = Object.getOwnPropertyNames(proto);
+
+    for (const name of names) {
+      if (name === 'constructor' || result.has(name)) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(proto, name);
+      if (descriptor) result.set(name, descriptor);
+    }
+
+    proto = Object.getPrototypeOf(proto); // Move up the prototype chain
+  }
+
+  return result;
+}

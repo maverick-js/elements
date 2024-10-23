@@ -1,5 +1,5 @@
 import { Component, createComponent, onAttach, onSetup } from '@maverick-js/core';
-import { type HTMLServerElement, ServerElement } from '@maverick-js/element/server';
+import { type HTMLServerElement, ServerElement } from '@maverick-js/ssr';
 
 it('should call `onSetup` lifecycle hook', () => {
   const setup = vi.fn(),
@@ -13,7 +13,7 @@ it('should call `onSetup` lifecycle hook', () => {
     }
   }
 
-  const host = new ServerElement(createComponent(TestComponent));
+  const host = new ServerElement('div', createComponent(TestComponent));
   host.setup();
 
   expect(setup).toBeCalledTimes(1);
@@ -37,7 +37,7 @@ it('should render attributes', () => {
     }
   }
 
-  const host = new ServerElement(createComponent(TestComponent));
+  const host = new ServerElement('div', createComponent(TestComponent));
   host.setup();
   host.destroy();
 
@@ -68,7 +68,7 @@ it('should render class list', () => {
     }
   }
 
-  const host = new ServerElement(createComponent(TestComponent));
+  const host = new ServerElement('div', createComponent(TestComponent));
   host.setup();
   host.destroy();
 
@@ -96,7 +96,7 @@ it('should render styles', () => {
     }
   }
 
-  const host = new ServerElement(createComponent(TestComponent));
+  const host = new ServerElement('div', createComponent(TestComponent));
   host.setup();
   host.destroy();
 
@@ -121,7 +121,7 @@ it('should noop events api', () => {
   }
 
   expect(() => {
-    const host = new ServerElement(createComponent(TestComponent));
+    const host = new ServerElement('div', createComponent(TestComponent));
     host.setup();
     host.destroy();
   }).not.toThrow();

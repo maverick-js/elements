@@ -1,5 +1,7 @@
 export * from './custom-element/attrs';
 export * from './custom-element/types';
+export * from './custom-element/internal';
+
 export * from './component';
 export * from './context';
 export * from './controller';
@@ -9,7 +11,8 @@ export * from './instance';
 export * from './lifecycle';
 export * from './signals';
 export * from './slots';
-export * from './state';
+export * from './store';
 export * from './symbols';
 export * from './types';
+
 export type { JSX } from '../jsx/jsx';

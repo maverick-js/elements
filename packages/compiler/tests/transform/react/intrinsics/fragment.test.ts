@@ -196,13 +196,13 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_h, $$_component, Fragment } from "@maverick-js/react";
+    "import { Fragment, ReactFragment, $$_h, $$_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("span");
     function Foo() {
         let $_component_1 = $$_component(Fragment, null, null, {
             "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
         });
-        return $_component_1;
+        return ($_component_1);
     }
     "
   `);

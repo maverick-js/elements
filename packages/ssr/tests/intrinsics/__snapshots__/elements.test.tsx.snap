@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dynamic child elements 1`] = `"<div><!$><span></span><!$><span></span></div>"`;
+
+exports[`dynamic text child expression 1`] = `"<div>Foo</div>"`;
+
+exports[`multiple dynamic child expressions 1`] = `"<div><!$><!$><div></div><!$><!$><span></span></div>"`;
+
+exports[`no children 1`] = `"<div></div>"`;
+
+exports[`static child elements 1`] = `"<div><span></span><span></span></div>"`;
+
+exports[`static child expression 1`] = `"<div>Foo</div>"`;
+
+exports[`text child 1`] = `"<div>Foo</div>"`;

@@ -2,7 +2,16 @@
 import type { CSSStyleProperty } from '@maverick-js/std';
 import type { ConditionalPick } from 'type-fest';
 
-import type { AnyComponent, NullableRecord, ReadSignal, SignalOrValueRecord } from '../core';
+import type {
+  AnyComponent,
+  ComponentMeta,
+  NullableRecord,
+  ReadSignal,
+  ResolveMetaCssProps,
+  ResolveMetaEvents,
+  ResolveMetaProps,
+  SignalOrValueRecord,
+} from '../core';
 
 type DOMNode = Node;
 type DOMElement = Element;
@@ -371,13 +380,13 @@ export namespace JSX {
       SignalInnerContentAttributes,
       GlobalCSSVarAttributes {}
 
-  export type ClassComponentAttributes<Props = {}, Events = {}, CSSVars = {}> = Partial<
-    SignalOrValueRecord<Props>
+  export type ClassComponentAttributes<Meta extends ComponentMeta> = Partial<
+    SignalOrValueRecord<ResolveMetaProps<Meta>>
   > &
     ClassAttributes &
     SignalClassAttributes &
-    SignalCSSVarAttributes<CSSVars> &
-    OnAttributes<EventTarget, Events> & {
+    SignalCSSVarAttributes<ResolveMetaCssProps<Meta>> &
+    OnAttributes<EventTarget, ResolveMetaEvents<Meta>> & {
       class?: string;
       children?: JSX.Element;
     };

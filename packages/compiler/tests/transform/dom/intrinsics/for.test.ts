@@ -10,7 +10,7 @@ import { For } from '@maverick-js/core';
 </For>
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_insert, $$_create_component, For, $$_create_template } from "@maverick-js/dom";
+    "import { For, $$_insert, $$_create_component, $$_create_template } from "@maverick-js/dom";
     let $_template_1 = /* @__PURE__ */ $$_create_template("<div> - </div>");
     function $$_render_1({ $3, $4 }) {
         let $_root_1 = $_template_1(), $_node_1 = $_root_1.firstChild;

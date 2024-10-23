@@ -4,34 +4,8 @@ import { useContext } from './context';
 import { computed, type ReadSignal, signal, type WriteSignal } from './signals';
 import type { AnyRecord, ReadSignalRecord } from './types';
 
-/**
- * Converts objects into signals. The factory stores the initial object and enables producing new
- * objects where each value in the provided object becomes a signal.
- *
- * @example
- * ```ts
- * const factory = new State({
- *   foo: 0,
- *   bar: '...',
- *   get baz() {
- *     return this.foo + 1;
- *   }
- * });
- *
- * console.log(factory.record); // logs `{ foo: 0, bar: '...' }`
- *
- * const $state = factory.create();
- *
- * effect(() => console.log($state.foo()));
- * // Run effect ^
- * $state.foo.set(1);
- *
- * // Reset all values
- * factory.reset($state);
- * ```
- */
-export class State<Record> {
-  readonly id = Symbol('maverick.state');
+export class StoreFactory<Record> {
+  readonly id = Symbol('maverick.store');
   readonly record: Record;
 
   #descriptors: {
@@ -71,16 +45,48 @@ export type Store<T> = {
 };
 
 export type InferStore<T> =
-  T extends State<infer Record> ? Store<Record> : T extends Store<any> ? T : never;
+  T extends StoreFactory<infer Record> ? Store<Record> : T extends Store<any> ? T : never;
 
 export type InferStoreRecord<T> =
-  T extends State<infer Record> ? Record : T extends Store<infer Record> ? Record : never;
+  T extends StoreFactory<infer Record> ? Record : T extends Store<infer Record> ? Record : never;
 
-export type StateContext<T> = ReadSignalRecord<T extends State<infer Record> ? Record : T>;
+export type StoreContext<T> = ReadSignalRecord<T extends StoreFactory<infer Record> ? Record : T>;
 
 /**
- * Returns the state record context value for the current component tree.
+ * Converts objects into signals. The factory stores the initial object and enables producing new
+ * objects where each value in the provided object becomes a signal.
+ *
+ * @example
+ * ```ts
+ * const store = createStore({
+ *   foo: 0,
+ *   bar: '...',
+ *   get baz() {
+ *     return this.foo + 1;
+ *   }
+ * });
+ *
+ * console.log(store.record); // logs `{ foo: 0, bar: '...' }`
+ *
+ * const $state = store.create();
+ *
+ * effect(() => console.log($state.foo()));
+ * // Run effect ^
+ * $state.foo.set(1);
+ *
+ * // Reset all values
+ * store.reset($state);
+ * ```
  */
-export function useState<Record extends AnyRecord>(state: State<Record>): StateContext<Record> {
-  return useContext(state);
+export function createStore<Record extends AnyRecord>(record: Record) {
+  return new StoreFactory<Record>(record);
+}
+
+/**
+ * Returns the store context for the current component tree.
+ */
+export function useStore<Record extends AnyRecord>(
+  store: StoreFactory<Record>,
+): StoreContext<Record> {
+  return useContext(store);
 }

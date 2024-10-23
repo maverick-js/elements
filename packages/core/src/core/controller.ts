@@ -1,18 +1,24 @@
 import { MaverickEvent, type MaverickEventInit } from '@maverick-js/std';
 
+import type {
+  ComponentMeta,
+  ResolveMetaEvents,
+  ResolveMetaProps,
+  ResolveMetaState,
+} from './component';
 import { $$_current_instance, Instance } from './instance';
 import { type Scope, untrack } from './signals';
 import { ON_DISPATCH_SYMBOL } from './symbols';
 import type { ReadSignalRecord, WriteSignalRecord } from './types';
 
-export class ViewController<Props = {}, State = {}, Events = {}, CSSVars = {}> extends EventTarget {
+export class ViewController<
+  Meta extends ComponentMeta = ComponentMeta,
+  Props = ResolveMetaProps<Meta>,
+  State = ResolveMetaState<Meta>,
+  Events = ResolveMetaEvents<Meta>,
+> extends EventTarget {
   /** @internal */
   readonly $$: Instance<Props, State>;
-
-  /** @internal type holder only */
-  readonly $ts__events?: Events;
-  /** @internal type holder only */
-  readonly $ts__vars?: CSSVars;
 
   get host(): HTMLElement | null {
     return this.$$.host;
@@ -39,7 +45,7 @@ export class ViewController<Props = {}, State = {}, Events = {}, CSSVars = {}> e
   }
 
   get $state(): WriteSignalRecord<State> {
-    return this.$$.$state;
+    return this.$$.store;
   }
 
   get state(): Readonly<State> {
@@ -89,6 +95,7 @@ export class ViewController<Props = {}, State = {}, Events = {}, CSSVars = {}> e
   }
 
   override dispatchEvent(event: Event): boolean {
+    if (__SERVER__) return false;
     return untrack(() => {
       this.$$[ON_DISPATCH_SYMBOL]?.(event);
       return super.dispatchEvent(event);

@@ -155,7 +155,7 @@ export type EventCallback<T extends Event> =
 
 export class MaverickEventTarget<Events> extends EventTarget {
   /** @internal type only */
-  readonly $ts__events?: Events;
+  readonly $$ts__events?: Events;
 
   dispatch<T extends keyof Events>(
     type: T,
@@ -247,10 +247,10 @@ const forwardedEventProps = /* #__PURE__ */ [
 ];
 
 export function cloneEvent<T extends Event>(event: T, init?: Partial<T>): T {
-  const prototype = Object.getPrototypeOf(event),
-    clone = new prototype.constructor(event.type, { ...event, ...init });
-
-  clone.original = event;
+  const clone = new (event.constructor as any)(event.type, {
+    ...event,
+    ...init,
+  });
 
   for (const prop of forwardedEventProps) {
     Object.defineProperty(clone, prop, {
@@ -258,6 +258,10 @@ export function cloneEvent<T extends Event>(event: T, init?: Partial<T>): T {
         return event[prop];
       },
     });
+  }
+
+  if (isMaverickEvent(clone)) {
+    clone.triggers.add(event);
   }
 
   return clone;

@@ -1,8 +1,8 @@
 import { isArray, isString, isUndefined } from '@maverick-js/std';
 import ts, { type NodeArray } from 'typescript';
 
-import { isTrueKeyword, isValueImportDeclarationFrom } from './is';
-import { getNamedImportBindings } from './module';
+import { isTrueKeyword } from './is';
+import { findParentStatement } from './visit';
 
 export const $ = ts.factory as typeof ts.factory & {
   emptyString: ts.StringLiteral;
@@ -167,7 +167,7 @@ export function getArrowFunctionBody(node: ts.Expression) {
   }
 }
 
-export function createSelfInvokedFunction(block: ts.Block) {
+export function createSelfInvokedFunction(block: ts.Block | Array<ts.Expression | ts.Statement>) {
   return $.createCallExpression(
     $.createParenthesizedExpression(createArrowFunction([], block)),
     undefined,
@@ -175,54 +175,51 @@ export function createSelfInvokedFunction(block: ts.Block) {
   );
 }
 
-export function removeImports(
-  root: ts.SourceFile,
-  moduleSpecifier: string,
-  imports: ts.ImportSpecifier[],
+export function transformTsNode<T extends ts.Node>(
+  root: T,
+  walk: (context: ts.TransformationContext) => ts.Visitor,
 ) {
   return ts.transform(root, [
-    (context) => () => {
-      function visitNamedImports(node: ts.Node) {
-        if (ts.isImportSpecifier(node) && imports.includes(node)) {
-          return;
-        }
-
-        return ts.visitEachChild(node, visitNamedImports, context);
-      }
-
-      function visit(node: ts.Node) {
-        if (isValueImportDeclarationFrom(node, moduleSpecifier)) {
-          const bindings = getNamedImportBindings(node);
-
-          // If there are no imports then we remove the declaration completely.
-          if (bindings && !bindings.some((specifier) => !imports.includes(specifier))) {
-            return;
-          }
-
-          return visitNamedImports(node);
-        }
-
-        return node;
-      }
-
-      return ts.visitEachChild(root, visit, context);
+    (context) => {
+      const visitor = walk(context);
+      return () => ts.visitEachChild(root, visitor, context);
     },
   ]).transformed[0];
 }
 
-export interface TsNodeMap extends WeakMap<ts.Node, ts.Node | ts.Node[] | undefined> {}
+export function replaceTsNode<T extends ts.Node>(root: T, oldNode: ts.Node, newNode: ts.Node) {
+  let stop = false;
+
+  function visit(this: ts.TransformationContext, child: ts.Node) {
+    if (stop) return child;
+
+    if (child === oldNode) {
+      stop = true;
+      return newNode;
+    }
+
+    return ts.visitEachChild(child, visit, this);
+  }
+
+  return transformTsNode(root, (ctx) => visit.bind(ctx));
+}
+
+export interface TsNodeMap extends Map<ts.Node, ts.Node | ts.Node[] | undefined> {}
 
 export function replaceTsNodes<T extends ts.Node>(root: T, replace: TsNodeMap) {
-  return ts.transform(root, [
-    (context) => () => {
-      function visit(node: ts.Node) {
-        if (replace.has(node)) return replace.get(node);
-        return ts.visitEachChild(node, visit, context);
-      }
+  function visit(this: ts.TransformationContext, node: ts.Node) {
+    if (replace.size === 0) return node;
 
-      return ts.visitEachChild(root, visit, context);
-    },
-  ]).transformed[0];
+    if (replace.has(node)) {
+      const replacement = replace.get(node);
+      replace.delete(node);
+      return replacement;
+    }
+
+    return ts.visitEachChild(node, visit, this);
+  }
+
+  return transformTsNode(root, (ctx) => visit.bind(ctx));
 }
 
 export function createPropertyGetExpression(obj: ts.Expression, prop: string | ts.Identifier) {
@@ -505,4 +502,68 @@ export function createIfStatement(
 
 export function createNotExpression(operand: ts.Expression) {
   return $.createPrefixUnaryExpression(ts.SyntaxKind.ExclamationToken, operand);
+}
+
+export function addStatementsToBlock<T extends ts.SourceFile | ts.Block | ts.ModuleBlock>(
+  block: T,
+  statements: Array<ts.Expression | ts.Statement>,
+  before?: ts.Node,
+) {
+  const target = before ? findParentStatement(before) : null,
+    pivot = target ? block.statements.indexOf(target) : block.statements.length,
+    newStatements = [
+      ...block.statements.slice(0, pivot),
+      ...createStatements(statements),
+      ...block.statements.slice(pivot),
+    ];
+
+  return (
+    ts.isBlock(block)
+      ? ts.factory.updateBlock(block, newStatements)
+      : ts.isModuleBlock(block)
+        ? ts.factory.updateModuleBlock(block, newStatements)
+        : ts.factory.updateSourceFile(
+            block,
+            newStatements,
+            block.isDeclarationFile,
+            block.referencedFiles,
+            block.typeReferenceDirectives,
+            block.hasNoDefaultLib,
+            block.libReferenceDirectives,
+          )
+  ) as T;
+}
+
+export type BlockUpdate = BlockAdd | BlockReplace;
+
+export interface BlockAdd {
+  type: 'add';
+  statements: Array<ts.Statement | ts.Expression>;
+  before?: ts.Node;
+}
+
+export interface BlockReplace {
+  type: 'replace';
+  old: ts.Node;
+  new: ts.Node;
+}
+
+export function updateBlock(block: ts.Block | ts.ModuleBlock, updates: BlockUpdate[]) {
+  if (updates.length === 0) return block;
+
+  const map = new Map();
+
+  for (const update of updates) {
+    if (update.type === 'add') {
+      block = addStatementsToBlock(block, update.statements, update.before);
+    } else if (update.type === 'replace') {
+      map.set(update.old, update.new);
+    }
+  }
+
+  if (map.size > 0) {
+    block = replaceTsNodes(block, map);
+  }
+
+  return block;
 }

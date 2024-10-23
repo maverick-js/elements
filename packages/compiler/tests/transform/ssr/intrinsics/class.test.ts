@@ -80,3 +80,16 @@ test('multiple signals', () => {
     "
   `);
 });
+
+test('with signal base', () => {
+  expect(ssr(`<svg $class={$class} $class:foo={isFoo} />`)).toMatchInlineSnapshot(`
+    "import { $$_unwrap, $$_class, $$_attrs, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = ["<!$><svg", "></svg>"];
+    $$_ssr($$_template_1, [$$_attrs({
+            class: $$_class($$_unwrap($class), {
+                "foo": isFoo
+            })
+        })]);
+    "
+  `);
+});

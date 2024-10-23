@@ -34,7 +34,7 @@ test('pass props to class component', () => {
     b: number;
   }
 
-  class Foo extends Component<Props> {
+  class Foo extends Component<{ props: Props }> {
     static props: Props = { a: 0, b: 0 };
 
     override render() {

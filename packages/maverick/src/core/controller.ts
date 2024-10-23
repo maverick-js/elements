@@ -15,9 +15,9 @@ export class MaverickViewController<
   readonly $$: MaverickInstance<Props, State>;
 
   /** @internal type holder only */
-  readonly $ts__events?: Events;
+  readonly $$ts__events?: Events;
   /** @internal type holder only */
-  readonly $ts__vars?: CSSVars;
+  readonly $$ts__vars?: CSSVars;
 
   get host(): HTMLElement | null {
     return this.$$.host;

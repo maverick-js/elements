@@ -4,6 +4,7 @@ import type ts from 'typescript';
 
 import { type AttributeNode, type ElementNode, isFragmentNode } from '../../../../parse/ast';
 import { createElementSpreadProps } from '../../shared/factory';
+import type { SsrRuntime } from '../runtime';
 import type { SsrVisitorContext } from '../state';
 
 export function Element(node: ElementNode, { state, walk }: SsrVisitorContext) {
@@ -49,7 +50,7 @@ export function Element(node: ElementNode, { state, walk }: SsrVisitorContext) {
     }
 
     if (node.classes) {
-      const base = classAttr?.initializer ?? $.null,
+      const base = unwrapAttributeValue(classAttr, runtime),
         $classProps = node.classes?.map((c) =>
           $.createPropertyAssignment($.string(c.name), c.initializer),
         ),
@@ -62,7 +63,7 @@ export function Element(node: ElementNode, { state, walk }: SsrVisitorContext) {
     }
 
     if (node.styles || node.vars) {
-      const base = stylesAttr?.initializer ?? $.null,
+      const base = unwrapAttributeValue(stylesAttr, runtime),
         $styleProps = node.styles?.map((s) =>
           $.createPropertyAssignment($.string(camelToKebabCase(s.name)), s.initializer),
         ),
@@ -102,4 +103,9 @@ export function Element(node: ElementNode, { state, walk }: SsrVisitorContext) {
 
     state.html += `</${node.name}>`;
   }
+}
+
+export function unwrapAttributeValue(node: AttributeNode | null, runtime: SsrRuntime) {
+  if (!node?.initializer) return $.null;
+  return node.signal ? runtime.unwrap(node.initializer) : node.initializer;
 }

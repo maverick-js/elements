@@ -1,4 +1,4 @@
-import { dom } from '../../transform';
+import { dom, domH } from '../../transform';
 
 test('text', () => {
   expect(dom('<Foo>Hello</Foo>')).toMatchInlineSnapshot(`
@@ -264,6 +264,41 @@ test('render function with multiple expressions', () => {
         return $_component_1;
     }
     $$_render_2({ $1: Foo, $5: ({ a, b, $c }) => ($$_render_1({ $2: a, $3: b, $4: $c })) });
+    "
+  `);
+});
+
+test('fragment named slot', () => {
+  expect(
+    domH(`
+  function Component() {
+    return (
+      <>
+        {() => ($showA() ? <div on:pointerup={noop} /> : null)}
+        {() => ($showB() ? <span on:pointerdown={noop} /> : null)}
+      </>
+    );
+  }
+      `),
+  ).toMatchInlineSnapshot(`
+    "import { $$_create_walker, $$_listen, $$_create_template } from "@maverick-js/dom";
+    let $_template_1 = /* @__PURE__ */ $$_create_template("<!$><div></div>"), $_template_2 = /* @__PURE__ */ $$_create_template("<!$><span></span>");
+    function $$_render_1({ $1 }) {
+        let [$_root_1, $_walker_1] = $$_create_walker($_template_1);
+        $$_listen($_root_1, "pointerup", $1);
+        return $_root_1;
+    }
+    function $$_render_2({ $3 }) {
+        let [$_root_2, $_walker_2] = $$_create_walker($_template_2);
+        $$_listen($_root_2, "pointerdown", $3);
+        return $_root_2;
+    }
+    function $$_fragment_1({ $2, $4 }) {
+        return [$2(), $4()];
+    }
+    function Component() {
+        return ($$_fragment_1({ $2: () => ($showA() ? $$_render_1({ $1: noop }) : null), $4: () => ($showB() ? $$_render_2({ $3: noop }) : null) }));
+    }
     "
   `);
 });

@@ -9,13 +9,17 @@ import {
 } from '../../shared/factory';
 import type { SsrTransformState, SsrVisitorContext } from '../state';
 import { transform } from '../transform';
+import { unwrapAttributeValue } from './element';
 
 export function Component(node: ComponentNode, { state }: SsrVisitorContext) {
   const { runtime } = state;
 
   const props = createComponentProps(node),
     spreads = node.spreads
-      ? state.vars.create('$_spread', runtime.mergeProps(node.spreads.map((s) => s.initializer)))
+      ? state.vars.local.create(
+          '$_spread',
+          runtime.mergeProps(node.spreads.map((s) => s.initializer)),
+        )
       : null,
     component = runtime.createComponent(
       node.name,
@@ -38,7 +42,7 @@ function createAttrs(
     const props: ts.PropertyAssignment[] = [];
 
     if (node.class) {
-      props.push($.createPropertyAssignment('class', node.class.initializer));
+      props.push($.createPropertyAssignment('class', unwrapAttributeValue(node.class, runtime)));
     }
 
     if (node.classes) {

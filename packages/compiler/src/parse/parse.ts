@@ -1,64 +1,292 @@
-import { logTime } from '@maverick-js/logger';
+import { LogLevel, reportDiagnosticByNode } from '@maverick-js/logger';
+import { isUndefined } from '@maverick-js/std';
 import {
-  findImportSpecifierFromDeclaration,
+  $,
+  createJsxFragment,
+  filterEmptyJsxChildNodes,
+  getJsxAttribute,
+  getJsxAttributes,
+  getJsxChildren,
+  getTagName,
+  isComponentTagName,
+  isEmptyNode,
   isJsxElementNode,
-  isValueImportDeclarationFrom,
-  isValueImportSpecifier,
+  isStaticLiteralNode,
+  type JsxElementNode,
+  type JsxRootNode,
 } from '@maverick-js/ts';
-import ts from 'typescript';
+import ts, { type JsxChild } from 'typescript';
 
-import type { ParseAnalysis } from './analysis';
-import { type AstNode, isNoopNode } from './ast';
-import { createAstNode } from './create-ast';
+import {
+  type AstNode,
+  type AttributeNode,
+  type ComponentAttributes,
+  type ComponentNode,
+  createComponentNode,
+  createElementNode,
+  createExpressionNode,
+  createFragmentNode,
+  createSpreadNode,
+  createTextNode,
+  type ElementAttributes,
+  type ElementNode,
+  type ExpressionNode,
+  type FragmentNode,
+} from './ast';
+import {
+  DELEGATED_EVENT_TYPE,
+  DYNAMIC_NAMESPACE,
+  INNER_CONTENT_PROP,
+  SVG_ELEMENT_TAGNAME,
+  VOID_ELEMENT_TAGNAME,
+} from './constants';
+import { type JsxAttrNamespace, type JsxNamespace } from './jsx';
+import { getExpressionChildren, isValidNamespace } from './utils';
 
-export interface ParseOptions {
-  filename: string;
+export function parse(node: ts.Node): AstNode | null {
+  if (isJsxElementNode(node)) {
+    const tagName = getTagName(node);
+    return isComponentTagName(tagName)
+      ? parseComponent(node, tagName)
+      : parseElement(node, tagName);
+  } else if (ts.isJsxFragment(node)) {
+    return parseFragment(node);
+  } else if (ts.isJsxText(node) && !isEmptyNode(node)) {
+    return createTextNode({ node: node });
+  } else if (ts.isJsxExpression(node) && node.expression && !isEmptyNode(node)) {
+    return parseExpression(node);
+  } else {
+    return null;
+  }
 }
 
-const tsxRE = /\.tsx/;
+function parseElement(node: JsxElementNode, tagName: string): ElementNode {
+  let isCustomElement = tagName.includes('-'),
+    isVoid = VOID_ELEMENT_TAGNAME.has(tagName),
+    isSVG = tagName === 'svg' || SVG_ELEMENT_TAGNAME.has(tagName),
+    isDynamic = isCustomElement,
+    attrs = parseAttrs(getJsxAttributes(node), isCustomElement, () => (isDynamic = true));
 
-export function parse(code: string, options: ParseOptions) {
-  let { filename } = options,
-    analysis: ParseAnalysis = { components: {} },
-    parseStartTime = process.hrtime(),
-    sourceFile = ts.createSourceFile(filename, code, 99, true, tsxRE.test(filename) ? 4 : 2),
-    astNodes: AstNode[] = [];
-
-  logTime({
-    message: `Parsed Source File (TS): ${filename}`,
-    startTime: parseStartTime,
+  return createElementNode({
+    node: node,
+    name: tagName,
+    isVoid,
+    isSVG,
+    isCustomElement,
+    children: !isVoid ? getJsxChildren(node)?.map(parse) : undefined,
+    isDynamic: () => isDynamic,
+    ...attrs,
   });
+}
 
-  const parse = (node: ts.Node) => {
-    if (isValueImportDeclarationFrom(node, '@maverick-js/core')) {
-      const Fragment = findImportSpecifierFromDeclaration(node, 'Fragment'),
-        Portal = findImportSpecifierFromDeclaration(node, 'Portal'),
-        For = findImportSpecifierFromDeclaration(node, 'For'),
-        ForKeyed = findImportSpecifierFromDeclaration(node, 'ForKeyed'),
-        Host = findImportSpecifierFromDeclaration(node, 'Host');
+function parseComponent(node: JsxElementNode, tagName: string): ComponentNode {
+  return createComponentNode({
+    node,
+    name: tagName,
+    ...parseAttrs(getJsxAttributes(node), true),
+    slots: getComponentSlots(getJsxChildren(node)),
+  });
+}
 
-      if (isValueImportSpecifier(Fragment)) analysis.components.Fragment = Fragment;
-      if (isValueImportSpecifier(Portal)) analysis.components.Portal = Portal;
-      if (isValueImportSpecifier(For)) analysis.components.For = For;
-      if (isValueImportSpecifier(ForKeyed)) analysis.components.ForKeyed = ForKeyed;
-      if (isValueImportSpecifier(Host)) analysis.components.Host = Host;
-    } else if (isJsxElementNode(node)) {
-      const astNode = createAstNode(node);
-      astNodes.push(astNode);
-      return;
-    } else if (ts.isJsxFragment(node)) {
-      astNodes.push(createAstNode(node));
-      return;
+function getComponentSlots(jsxChildren?: ts.JsxChild[]) {
+  if (!jsxChildren) return;
+
+  const slots: Record<string, AstNode> = {},
+    defaultSlots: ts.JsxChild[] = [];
+
+  function addSlot(name: string, nodes: ts.NodeArray<JsxChild>) {
+    const children = filterEmptyJsxChildNodes(Array.from(nodes));
+    if (children.length === 1) {
+      slots[name] = parse(children[0]);
+    } else {
+      slots[name] = parse(createJsxFragment($.createNodeArray(children)));
+    }
+  }
+
+  for (const jsxChild of jsxChildren) {
+    if (ts.isJsxElement(jsxChild) || ts.isJsxSelfClosingElement(jsxChild)) {
+      const slotAttrInit = getJsxAttribute(jsxChild, 'slot')?.initializer;
+
+      if (slotAttrInit) {
+        if (!ts.isStringLiteral(slotAttrInit)) {
+          reportAttributeNotStaticStringLiteral('slot', slotAttrInit);
+        } else {
+          const slotName = slotAttrInit.text;
+          addSlot(slotName, $.createNodeArray([jsxChild]));
+        }
+
+        continue;
+      }
+
+      if (getTagName(jsxChild).includes('.Slot')) {
+        const nameAttrInit = getJsxAttribute(jsxChild, 'name')?.initializer,
+          slotName = nameAttrInit && ts.isStringLiteral(nameAttrInit) ? nameAttrInit.text : null;
+
+        if (nameAttrInit && !ts.isStringLiteral(nameAttrInit)) {
+          reportAttributeNotStaticStringLiteral('name', nameAttrInit);
+        }
+
+        const children = (jsxChild as ts.JsxElement).children ?? [];
+        if (children.length) {
+          if (!slotName) {
+            defaultSlots.push(...children);
+          } else {
+            addSlot(slotName, children);
+          }
+        }
+
+        continue;
+      }
     }
 
-    ts.forEachChild(node, parse);
-  };
+    defaultSlots.push(jsxChild);
+  }
 
-  ts.forEachChild(sourceFile, parse);
+  if (defaultSlots.length > 0) {
+    addSlot('default', $.createNodeArray(defaultSlots));
+  }
 
-  return {
-    analysis,
-    sourceFile,
-    nodes: astNodes.filter((node) => !isNoopNode(node)),
-  };
+  return Object.keys(slots).length ? slots : undefined;
+}
+
+function parseAttrs(
+  root: ts.JsxAttributes,
+  isComponent: boolean,
+  onDynamic?: () => void,
+): ElementAttributes {
+  let attrs: ElementAttributes = {},
+    jsxAttrs = Array.from(root.properties) as (ts.JsxAttribute | ts.JsxSpreadAttribute)[];
+
+  for (const jsxAttr of jsxAttrs) {
+    if (ts.isJsxSpreadAttribute(jsxAttr)) {
+      (attrs.spreads ??= []).push(
+        createSpreadNode({
+          node: jsxAttr,
+          initializer: jsxAttr.expression,
+        }),
+      );
+      onDynamic?.();
+      continue;
+    }
+
+    const initializer = jsxAttr.initializer,
+      stringLiteral = initializer && ts.isStringLiteral(initializer) ? initializer : undefined,
+      expression =
+        initializer && ts.isJsxExpression(initializer) ? initializer.expression : undefined;
+
+    if (initializer && isEmptyNode((stringLiteral || expression)!)) continue;
+
+    let attrText = jsxAttr.name.getText() || '',
+      nameParts = attrText.includes(':') ? attrText.split(':') : [],
+      hasValidNamespace = isValidNamespace(nameParts[0]),
+      namespace = hasValidNamespace ? (nameParts[0] as JsxNamespace) : undefined,
+      name = hasValidNamespace ? nameParts[1] : attrText,
+      isStaticExpression = !!expression && isStaticLiteralNode(expression),
+      isStaticValue = !initializer || isStaticLiteralNode(initializer) || isStaticExpression;
+
+    if (!isComponent || hasValidNamespace) {
+      name = name.replace(/^\$/, '');
+    }
+
+    const signal = attrText.startsWith('$'),
+      dynamic =
+        signal ||
+        !isStaticValue ||
+        (namespace && DYNAMIC_NAMESPACE.has(namespace)) ||
+        name === 'ref',
+      init = expression ?? stringLiteral ?? ts.factory.createTrue();
+
+    if (dynamic) onDynamic?.();
+
+    const attr: AttributeNode = {
+      node: jsxAttr,
+      initializer: init,
+      name,
+      namespace: namespace as JsxAttrNamespace,
+      dynamic,
+      signal,
+    };
+
+    if (INNER_CONTENT_PROP.has(name)) {
+      attrs.content = attr;
+    } else if (namespace) {
+      if (namespace === 'on' || (namespace === 'on_capture' && !isUndefined(expression))) {
+        (attrs.events ??= []).push({
+          node: jsxAttr,
+          initializer: init,
+          namespace,
+          type: name,
+          capture: namespace === 'on_capture',
+          delegate: namespace !== 'on_capture' && DELEGATED_EVENT_TYPE.has(name),
+        });
+      } else if (namespace === 'class' || namespace === '$class') {
+        (attrs.classes ??= []).push(attr);
+      } else if (namespace === 'prop' || namespace === '$prop') {
+        (attrs.props ??= []).push(attr);
+      } else if (namespace === 'style' || namespace === '$style') {
+        (attrs.styles ??= []).push(attr);
+      } else if (namespace === 'var' || namespace === '$var') {
+        (attrs.vars ??= []).push(attr);
+      }
+    } else if (name === 'slot') {
+      attrs.slot = attr;
+    } else if (name === 'ref') {
+      if (expression) {
+        attrs.ref = {
+          node: jsxAttr,
+          initializer: expression,
+        };
+      }
+    } else if (isComponent) {
+      if (name === 'class' || name === '$class') {
+        (attrs as ComponentAttributes).class = attr;
+      } else {
+        (attrs.props ??= []).push(attr);
+      }
+    } else {
+      (attrs.attrs ??= []).push(attr);
+    }
+  }
+
+  return attrs;
+}
+
+function parseFragment(node: ts.JsxFragment): FragmentNode {
+  const children: AstNode[] = [],
+    jsxChildren = filterEmptyJsxChildNodes(Array.from(node.children));
+
+  for (const child of jsxChildren) {
+    if (ts.isJsxText(child)) {
+      children.push(createTextNode({ node: child }));
+    } else if (ts.isJsxExpression(child)) {
+      children.push(parseExpression(child));
+    } else {
+      const node = parse(child);
+      if (node) children.push(node);
+    }
+  }
+
+  return createFragmentNode({ node, children });
+}
+
+function parseExpression(node: ts.JsxExpression): ExpressionNode {
+  const expression = ts.isJsxExpression(node) ? node.expression! : node,
+    children = getExpressionChildren(expression),
+    isStatic = !children && isStaticLiteralNode(expression);
+  return createExpressionNode({
+    node,
+    expression,
+    children,
+    dynamic: !isStatic,
+  });
+}
+
+function reportAttributeNotStaticStringLiteral(name: string, node: ts.Node) {
+  reportDiagnosticByNode(
+    {
+      message: `The \`${name}\` attribute must be a static string literal.`,
+      node,
+    },
+    LogLevel.Error,
+  );
 }

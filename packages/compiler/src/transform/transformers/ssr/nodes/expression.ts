@@ -43,6 +43,8 @@ function escapeExpressions<T extends ts.Node>(root: T, { runtime }: SsrTransform
   function visit(node: ts.Node) {
     if (isJsxRootNode(node)) {
       // stop
+    } else if (ts.isParenthesizedExpression(node)) {
+      visit(node.expression);
     } else if (isLogicalAndExpression(node)) {
       visit(node.right);
     } else if (isNullishCoalescing(node)) {

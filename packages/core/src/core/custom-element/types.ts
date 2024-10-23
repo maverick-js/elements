@@ -6,7 +6,7 @@ import type {
   InferComponentProps,
   InferComponentState,
 } from '../component';
-import type { Store } from '../state';
+import type { Store } from '../store';
 import type { ReadSignalRecord } from '../types';
 import type { Attributes } from './attrs';
 
@@ -37,17 +37,21 @@ export interface MaverickCustomElement<T extends Component = AnyComponent> exten
   readonly $: T;
 
   readonly scope: Scope;
-  readonly attachScope: Scope | null;
   readonly connectScope: Scope | null;
+
+  /**
+   * Whether the element is managed by the Maverick DOM framework.
+   */
+  readonly isManaged: boolean;
 
   /** @internal */
   readonly $props: ReadSignalRecord<InferComponentProps<T>>;
 
   /** @internal */
-  readonly $state: Store<InferComponentState<T>>;
+  readonly $store: Store<InferComponentState<T>>;
 
   /**
-   * This object contains the state of the component.
+   * This object contains the state of the component store.
    *
    * ```ts
    * const el = document.querySelector('foo-el');
@@ -59,7 +63,7 @@ export interface MaverickCustomElement<T extends Component = AnyComponent> exten
     : Readonly<InferComponentState<T>>;
 
   /**
-   * Enables subscribing to live updates of component state.
+   * Enables subscribing to live updates of the component store.
    *
    * @example
    * ```ts
@@ -84,6 +88,16 @@ export interface MaverickCustomElementConstructor<T extends Component = AnyCompo
 }
 
 export interface CustomElementOptions<Props = {}> {
+  /**
+   * The tag name of the custom element.
+   */
   readonly name: string;
-  readonly attrs?: Attributes<Props>;
+  /**
+   * The HTML tag name to be used when custom elements are not being used as a compile target.
+   */
+  readonly fallbackTag: keyof HTMLElementTagNameMap;
+  /**
+   * Component property to attribute name and value conversions.
+   */
+  readonly attributes?: Attributes<Props>;
 }

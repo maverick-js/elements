@@ -10,14 +10,16 @@ import { Portal } from "@maverick-js/core";
 </Portal>
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_h, $$_component, Portal } from "@maverick-js/react";
+    "import { Portal, $$_h, $$_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div");
-    let $_component_1 = $$_component(Portal, {
-        "to": "body"
-    }, null, {
-        "default": () => $_static_node_1
-    });
-    $_component_1
+    (() => {
+        let $_component_1 = $$_component(Portal, {
+            "to": "body"
+        }, null, {
+            "default": () => $_static_node_1
+        });
+        return $_component_1;
+    })();
     "
   `);
 });

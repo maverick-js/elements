@@ -35,3 +35,37 @@ export function findImportSpecifierFromElements(
 ) {
   return elements.find((element) => element.name.text === id);
 }
+
+export function removeImportSpecifiers(node: ts.ImportDeclaration, remove: string[]) {
+  const bindings = node.importClause?.namedBindings;
+
+  if (bindings && ts.isNamedImports(bindings)) {
+    const remainingSpecifiers = bindings.elements.filter(
+      (specifier) => !remove.includes(specifier.name.text),
+    );
+
+    // If no specifiers are left, remove the entire import declaration.
+    if (remainingSpecifiers.length === 0) {
+      return undefined;
+    }
+
+    const updatedNamedImports = ts.factory.updateNamedImports(bindings, remainingSpecifiers);
+
+    const updatedImportClause = ts.factory.updateImportClause(
+      node.importClause,
+      node.importClause.isTypeOnly,
+      node.importClause.name,
+      updatedNamedImports,
+    );
+
+    return ts.factory.updateImportDeclaration(
+      node,
+      node.modifiers,
+      updatedImportClause,
+      node.moduleSpecifier,
+      node.attributes,
+    );
+  }
+
+  return node;
+}

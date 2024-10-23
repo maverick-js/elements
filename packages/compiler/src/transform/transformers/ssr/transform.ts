@@ -20,7 +20,10 @@ export const ssrVisitors: Visitors<SsrTransformState> = {
   Text,
 };
 
-export function transform(node: AstNode, state: SsrTransformState): ts.Expression {
+export function transform(
+  node: AstNode,
+  state: SsrTransformState,
+): ts.Expression | Array<ts.Expression | ts.Statement> {
   if (isTextNode(node)) {
     return $.string(node.value);
   }
@@ -44,12 +47,22 @@ export function transform(node: AstNode, state: SsrTransformState): ts.Expressio
     return state.statics[0];
   } else if (state.statics.length > 0) {
     state.template = $.createUniqueName('$$_template');
-    return state.runtime.ssr(state.template, state.values);
+    const result = state.runtime.ssr(state.template, state.values);
+    return addLocalVariables(result, state);
   }
 
   if (state.values.length > 0) {
-    return state.values.length === 1 ? state.values[0] : $.array(state.values);
+    const result = state.values.length === 1 ? state.values[0] : $.array(state.values);
+    return addLocalVariables(result, state);
   }
 
   return $.null;
+}
+
+function addLocalVariables(result: ts.Expression, state: SsrTransformState) {
+  if (state.vars.local.length > 0) {
+    return [state.vars.local.toStatement(), result];
+  }
+
+  return result;
 }

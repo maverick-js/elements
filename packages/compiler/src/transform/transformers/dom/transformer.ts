@@ -1,14 +1,19 @@
 import {
   $,
   createImports,
-  replaceTsNodes,
+  isJsxRootNode,
   resetUniqueIdCount,
   splitImportsAndBody,
-  type TsNodeMap,
+  transformTsNode,
 } from '@maverick-js/ts';
 import ts from 'typescript';
 
+import {
+  isMaverickCoreImportDeclaration,
+  removeVirtualComponentImports,
+} from '../../../parse/analysis';
 import { Scope } from '../../../parse/ast';
+import { parse } from '../../../parse/parse';
 import { setupCustomElements } from '../shared/element';
 import { Variables } from '../shared/variables';
 import type { Transform, TransformData } from '../transformer';
@@ -45,30 +50,36 @@ export function createDomTransform(options?: DomTransformOptions): Transform {
 }
 
 export function domTransform(
-  { sourceFile, nodes, ctx }: TransformData,
+  { sourceFile }: TransformData,
   { customElements, hydratable, delegateEvents }: DomTransformOptions = {},
 ) {
-  const state = new DomTransformState(null, { hydratable }),
-    replace: TsNodeMap = new Map();
+  let state = new DomTransformState(null, { hydratable }),
+    seenImports = false;
 
-  for (const node of nodes) {
-    const result = transform(node, state.child(node, new Scope()));
-    if (result) replace.set(node.node, result);
-    resetUniqueIdCount();
+  function visit(this: ts.TransformationContext, node: ts.Node) {
+    if (!seenImports && isMaverickCoreImportDeclaration(node)) {
+      seenImports = true;
+      return removeVirtualComponentImports(node, (name) => state.runtime.add(name));
+    } else if (isJsxRootNode(node)) {
+      const ast = parse(node),
+        result = ast ? transform(ast, state.child(ast, new Scope())) : $.null;
+
+      resetUniqueIdCount();
+
+      return result;
+    }
+
+    return ts.visitEachChild(node, visit, this);
   }
 
-  const { imports, body } = splitImportsAndBody(sourceFile);
+  const transformedSourceFile = transformTsNode(sourceFile, (ctx) => visit.bind(ctx)),
+    { imports, body } = splitImportsAndBody(transformedSourceFile);
 
   if (delegateEvents && state.delegatedEvents.size > 0) {
     body.push(createDelegateEventsStatement(state.delegatedEvents, state.runtime));
   }
 
   const statements: ts.Statement[] = [];
-
-  const components = ctx.analysis.components;
-  for (const component of Object.keys(components)) {
-    if (components[component]) state.runtime.add(component);
-  }
 
   const templates = createTemplateVariables(state);
 
@@ -82,24 +93,26 @@ export function domTransform(
     statements.push(state.vars.module.toStatement());
   }
 
-  const transformedSourceFile = replaceTsNodes(
-    $.updateSourceFile(sourceFile, [...imports, ...statements, ...state.renders, ...body]),
-    replace,
-  );
+  const updatedSourceFile = $.updateSourceFile(transformedSourceFile, [
+    ...imports,
+    ...statements,
+    ...state.renders,
+    ...body,
+  ]);
 
   return customElements
-    ? setupCustomElements(transformedSourceFile, registerCustomElement, [createElementImport()])
-    : transformedSourceFile;
+    ? setupCustomElements(updatedSourceFile, registerCustomElement, [createElementImport()])
+    : updatedSourceFile;
 }
 
-const registerCustomElementExpression = $.call($.id('$$_create_custom_element'), [$.id('this')]);
+const registerCustomElementExpression = $.call($.id('$$_define_custom_element'), [$.id('this')]);
 
 function registerCustomElement() {
   return registerCustomElementExpression;
 }
 
 function createElementImport() {
-  return createImports([$.id('$$_create_custom_element')], '@maverick-js/element');
+  return createImports([$.id('$$_define_custom_element')], '@maverick-js/element');
 }
 
 function createTemplateVariables(state: DomTransformState) {

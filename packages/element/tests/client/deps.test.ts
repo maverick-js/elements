@@ -27,6 +27,7 @@ it('should wait for parents to connect', async () => {
   class ParentA extends Component {
     static element: CustomElementOptions = {
       name: 'mk-parent-a',
+      fallbackTag: 'div',
     };
 
     constructor() {
@@ -40,6 +41,7 @@ it('should wait for parents to connect', async () => {
   class ParentB extends Component {
     static element: CustomElementOptions = {
       name: 'mk-parent-b',
+      fallbackTag: 'div',
     };
 
     constructor() {
@@ -57,6 +59,7 @@ it('should wait for parents to connect', async () => {
   class Child extends Component {
     static element: CustomElementOptions = {
       name: 'mk-child',
+      fallbackTag: 'div',
     };
 
     constructor() {
@@ -75,6 +78,7 @@ it('should wait for parents to connect', async () => {
   class GrandChild extends Component {
     static element: CustomElementOptions = {
       name: 'mk-grandchild',
+      fallbackTag: 'div',
     };
 
     constructor() {

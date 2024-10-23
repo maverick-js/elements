@@ -1,12 +1,22 @@
+import { isArray } from '@maverick-js/std';
 import {
   $,
+  addStatementsToBlock,
+  type BlockUpdate,
+  createStatements,
+  isJsxRootNode,
   replaceTsNodes,
-  resetUniqueIdCount,
   splitImportsAndBody,
-  type TsNodeMap,
+  transformTsNode,
+  updateBlock,
 } from '@maverick-js/ts';
 import ts from 'typescript';
 
+import {
+  isMaverickCoreImportDeclaration,
+  removeVirtualComponentImports,
+} from '../../../parse/analysis';
+import { parse } from '../../../parse/parse';
 import { setupCustomElements } from '../shared/element';
 import type { Transform, TransformData } from '../transformer';
 import { SsrTransformState } from './state';
@@ -25,24 +35,75 @@ export function createSsrTransform(options?: SsrTransformOptions): Transform {
 }
 
 export function ssrTransform(
-  { sourceFile, nodes, ctx }: TransformData,
+  { sourceFile }: TransformData,
   { customElements }: SsrTransformOptions = {},
 ) {
-  const state = new SsrTransformState(null),
-    replace: TsNodeMap = new Map();
+  let state = new SsrTransformState(null),
+    seenImports = false,
+    blocks: BlockUpdate[][] = [];
 
-  for (const node of nodes) {
-    const result = transform(node, state.child(node));
-    if (result) replace.set(node.node, result);
-    resetUniqueIdCount();
+  function visit(this: ts.TransformationContext, node: ts.Node) {
+    if (!seenImports && isMaverickCoreImportDeclaration(node)) {
+      seenImports = true;
+      return removeVirtualComponentImports(node, (name) => state.runtime.add(name));
+    } else if (ts.isBlock(node) || ts.isModuleBlock(node)) {
+      const updates: BlockUpdate[] = [];
+
+      blocks.push(updates);
+      const block = ts.visitEachChild(node, visit, this);
+      blocks.pop();
+
+      return updateBlock(block, updates);
+    } else if (isJsxRootNode(node)) {
+      const ast = parse(node),
+        result = ast ? transform(ast, state.child(ast)) : $.null,
+        currentBlock = blocks.at(-1);
+
+      if (currentBlock) {
+        if (isArray(result)) {
+          const setup = result.slice(0, -1);
+
+          currentBlock.push({
+            type: 'add',
+            statements: setup,
+            before: node,
+          });
+
+          currentBlock.push({
+            type: 'replace',
+            old: node,
+            new: result.at(-1)!,
+          });
+        } else {
+          currentBlock.push({
+            type: 'replace',
+            old: node,
+            new: result,
+          });
+        }
+
+        // Return original block and transform above.
+        return node;
+      }
+
+      if (isArray(result)) {
+        const render = result.at(-1)!;
+
+        if (ts.isExpression(render)) {
+          result[result.length - 1] = $.createReturnStatement(render);
+        }
+
+        return $.selfInvokedFn(result);
+      }
+
+      return result;
+    }
+
+    return ts.visitEachChild(node, visit, this);
   }
 
-  const { imports, body } = splitImportsAndBody(sourceFile);
-
-  const components = ctx.analysis.components;
-  for (const component of Object.keys(components)) {
-    if (components[component]) state.runtime.add(component);
-  }
+  const transformedSourceFile = transformTsNode(sourceFile, (ctx) => visit.bind(ctx)),
+    { imports, body } = splitImportsAndBody(transformedSourceFile);
 
   const statements: ts.Statement[] = [];
 
@@ -51,24 +112,29 @@ export function ssrTransform(
   }
 
   addTemplateVariables(state);
-  if (state.vars.length > 0) {
-    statements.push(state.vars.toStatement());
+  if (state.vars.module.length > 0) {
+    statements.push(state.vars.module.toStatement());
   }
 
-  const transformedSourceFile = replaceTsNodes(
-    $.updateSourceFile(sourceFile, [...imports, ...statements, ...body]),
-    replace,
-  );
+  const updatedSourceFile = $.updateSourceFile(transformedSourceFile, [
+    ...imports,
+    ...statements,
+    ...body,
+  ]);
 
   return customElements
-    ? setupCustomElements(transformedSourceFile, () => $.createTrue())
-    : transformedSourceFile;
+    ? setupCustomElements(updatedSourceFile, registerCustomElement)
+    : updatedSourceFile;
+}
+
+function registerCustomElement() {
+  return $.createTrue();
 }
 
 function addTemplateVariables(state: SsrTransformState) {
   state.walk(({ template, statics }) => {
     if (template && statics.length > 0) {
-      state.vars.create(template, $.array(statics));
+      state.vars.module.create(template, $.array(statics));
     }
   });
 }

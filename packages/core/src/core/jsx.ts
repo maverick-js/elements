@@ -9,9 +9,8 @@ import type { SignalOrValue } from './types';
 // ---------------------------------------------------------------------------------------------
 
 export interface HostProps
-  extends Omit<JSX.IntrinsicElementAttributes<HTMLElement>, 'as' | 'children'>,
+  extends Omit<JSX.IntrinsicElementAttributes<HTMLElement>, 'children'>,
     JSX.OnAttributes<HTMLElement, ComponentLifecycleEvents> {
-  as: keyof HTMLElementTagNameMap;
   children?: JSX.Element;
 }
 
@@ -77,13 +76,17 @@ export function Portal(props: PortalProps): JSX.Element {
 // <For>
 // ---------------------------------------------------------------------------------------------
 
-export interface ForDefaultSlot<Item> {
+export interface ForDefaultSlot<Item = unknown> {
   (item: ReadSignal<Item>, index: number): JSX.Element;
 }
 
-export interface ForProps<Item> {
+export interface ForProps<Item = unknown> {
   each: Maybe<Item[] | ReadSignal<Item[]>>;
   children: ForDefaultSlot<Item>;
+}
+
+export interface ForSlots<Item = unknown> {
+  default: ForDefaultSlot<Item>;
 }
 
 /**
@@ -108,13 +111,18 @@ export function For<Item>(props: ForProps<Item>): JSX.Element {
 // <ForKeyed>
 // ---------------------------------------------------------------------------------------------
 
-export interface ForKeyedDefaultSlot<Item> {
+export interface ForKeyedDefaultSlot<Item = unknown> {
   (item: Item, index: ReadSignal<number>): JSX.Element;
 }
 
-export interface ForKeyedProps<Item> {
+export interface ForKeyedProps<Item = unknown> {
+  key?: (item: Item) => any;
   each: Maybe<Item[] | ReadSignal<Item[]>>;
   children: ForKeyedDefaultSlot<Item>;
+}
+
+export interface ForKeyedSlots<Item = unknown> {
+  default: ForKeyedDefaultSlot<Item>;
 }
 
 /**

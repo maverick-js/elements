@@ -44,7 +44,7 @@ export function buildMembersMeta(
     props.push({
       [TS_NODE_SYMBOL]: stateDeclaration,
       name: 'state',
-      docs: 'This object contains the current state of the component.',
+      docs: 'This object contains the current state of the component store.',
       type,
       readonly: true,
     });

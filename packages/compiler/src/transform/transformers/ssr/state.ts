@@ -12,7 +12,10 @@ export class SsrTransformState {
   readonly statics: ts.StringLiteral[] = [];
   readonly values: ts.Expression[] = [];
   readonly children: SsrTransformState[] = [];
-  readonly vars: Variables;
+  readonly vars: {
+    module: Variables;
+    local: Variables;
+  };
 
   html = '';
   template?: ts.Identifier;
@@ -20,7 +23,10 @@ export class SsrTransformState {
   constructor(root: AstNode | null, init?: Partial<SsrTransformState>) {
     this.root = root;
     this.runtime = init?.runtime ?? new SsrRuntime();
-    this.vars = init?.vars ?? new Variables();
+    this.vars = {
+      module: init?.vars?.module ?? new Variables(),
+      local: new Variables(),
+    };
   }
 
   marker() {

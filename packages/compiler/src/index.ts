@@ -1,4 +1,3 @@
-export { createAstNode } from './parse/create-ast';
 export { parse } from './parse/parse';
 export * from './parse/ast';
 export * from './parse/walk';

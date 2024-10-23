@@ -14,7 +14,7 @@ function Foo() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component, For } from "@maverick-js/react";
+    "import { For, $$_expression, $$_h, $$_component } from "@maverick-js/react";
     function Foo() {
         let $_component_1 = $$_component(For, {
             "each": [0, 1, 2]
@@ -25,7 +25,7 @@ function Foo() {
             let $_node_1 = $$_expression(item), $_node_2 = $$_expression(index);
             return $$_h("div", null, $_node_1, " - ", $_node_2);
         }
-        return $_component_1;
+        return ($_component_1);
     }
     "
   `);

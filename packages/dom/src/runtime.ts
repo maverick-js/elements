@@ -1,28 +1,27 @@
 import {
+  $$_current_host_component,
   $$_current_slots,
+  $$_priority_attach,
+  $$_set_current_host_component,
   $$_set_current_slots,
   type AnyComponent,
-  ATTACH_SYMBOL,
   type ComponentConstructor,
   computed,
   createComponent,
-  CUSTOM_ELEMENT_SYMBOL,
   effect,
   type FunctionComponent,
   isComponentConstructor,
   type JSX,
   listenEvent,
-  type MaverickCustomElement,
   peek,
   type ReadSignal,
+  RENDER_SYMBOL,
   scoped,
-  SETUP_SYMBOL,
   type SlotRecord,
 } from '@maverick-js/core';
 import {
   isArray,
   isFunction,
-  isHTMLElement,
   isString,
   isUndefined,
   setAttribute,
@@ -30,7 +29,6 @@ import {
   toggleClass,
 } from '@maverick-js/std';
 
-import { Host } from './components/host';
 import { insert } from './insert';
 import { hydration } from './render';
 import { createMarkerWalker } from './walker';
@@ -61,19 +59,10 @@ export function $$_create_walker(template: () => Node): [root: Node, walker: Tre
 }
 
 /** @internal */
-export let $$_current_class_component: AnyComponent | null = null;
-
-/** @internal */
-export let $$_current_host_element: HTMLElement | null = null;
-
-/** @internal */
-export let $$_rendering_custom_element = false;
-
-/** @internal */
-export const $$_component_stack: Array<AnyComponent | null> = [];
-
-/** @internal */
 export const $$_slot_stack: Array<SlotRecord | null> = [];
+
+/** @internal */
+export const $$_host_stack: Array<AnyComponent | null> = [];
 
 /** @internal */
 export function $$_create_component(
@@ -90,80 +79,32 @@ export function $$_create_component(
 
       if (isComponentConstructor(Component)) {
         try {
-          $$_component_stack.push($$_current_class_component);
+          $$_host_stack.push($$_current_host_component);
 
-          const customElement = createCustomElement(Component),
-            component = customElement?.$ ?? createComponent(Component, { props });
+          const component = createComponent(Component, { props });
+          $$_set_current_host_component(component);
 
           listen?.(component);
+          if (onAttach) $$_priority_attach(component, onAttach);
 
-          $$_current_class_component = component;
-          $$_current_host_element = customElement;
+          component.$$.setup();
 
-          if (onAttach) component.$$[ATTACH_SYMBOL].push(onAttach);
-
-          if (customElement) {
-            $$_rendering_custom_element = true;
-            // Setup, attach, and render are called internally.
-            customElement[SETUP_SYMBOL]();
-            $$_rendering_custom_element = false;
-            return customElement;
-          } else {
-            component.$$.setup();
-            return component.render ? scoped(() => component!.render!(), component.$$.scope) : null;
-          }
+          return component[RENDER_SYMBOL]();
         } finally {
-          $$_current_class_component = $$_component_stack.pop()!;
+          $$_set_current_host_component($$_host_stack.pop()!);
         }
-      } else if (Component === Host) {
-        if (__DEV__ && !$$_current_class_component) {
-          throw Error(
-            `[maverick]: <Host> can only be called at the top of a class component render function [@\`${Component.name}\`]`,
-          );
-        }
-
-        const host = Component(props ?? {}) as unknown as HTMLElement;
-
-        listen?.(host);
-
-        // Custom element will call attach and connect internally.
-        if ($$_current_host_element) {
-          onAttach?.(host);
-        } else {
-          onAttach?.(host);
-          $$_current_class_component!.$$.attach(host);
-          connectToHost.bind($$_current_class_component!);
-        }
-
-        return host;
       } else {
+        if ($$_current_host_component) {
+          if (onAttach) $$_priority_attach($$_current_host_component, onAttach);
+          if (listen) $$_priority_attach($$_current_host_component, listen);
+        }
+
         return Component(props ?? {});
       }
     } finally {
-      $$_current_host_element = null;
       $$_set_current_slots($$_slot_stack.pop()!);
     }
   });
-}
-
-function connectToHost(this: AnyComponent) {
-  requestAnimationFrame(() => this.$$.connect());
-}
-
-function createCustomElement(Component: ComponentConstructor) {
-  if (!isCustomElement(Component)) return null;
-
-  const el = hydration
-    ? $$_next_element<MaverickCustomElement>(hydration.w)
-    : Component[CUSTOM_ELEMENT_SYMBOL]!();
-
-  el.keepAlive = true;
-
-  return el;
-}
-
-function isCustomElement(Component: object) {
-  return CUSTOM_ELEMENT_SYMBOL in Component;
 }
 
 /** @internal */

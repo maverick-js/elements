@@ -49,4 +49,8 @@ export class SsrRuntime extends Runtime {
   escape(value: ts.Expression) {
     return this.call('escape', [value]);
   }
+
+  unwrap(value: ts.Expression) {
+    return this.call('unwrap', [value]);
+  }
 }

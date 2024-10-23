@@ -25,20 +25,20 @@ class Lux {}
       { customElements: true },
     ),
   ).toMatchInlineSnapshot(`
-    "import { $$_create_custom_element } from "@maverick-js/element";
-    import { CUSTOM_ELEMENT_SYMBOL } from "@maverick-js/core";
+    "import { $$_define_custom_element } from "@maverick-js/element";
+    import { DEFINE_ELEMENT_SYMBOL } from "@maverick-js/core";
     import { Component } from '@maverick-js/core';
     class Foo extends Component {
-        static [CUSTOM_ELEMENT_SYMBOL]() {
-            return $$_create_custom_element(this);
+        static [DEFINE_ELEMENT_SYMBOL]() {
+            return $$_define_custom_element(this);
         }
         static element = {
             name: 'foo-element'
         };
     }
     class Bar extends Component {
-        static [CUSTOM_ELEMENT_SYMBOL]() {
-            return $$_create_custom_element(this);
+        static [DEFINE_ELEMENT_SYMBOL]() {
+            return $$_define_custom_element(this);
         }
         static element = {
             name: 'bar-element'

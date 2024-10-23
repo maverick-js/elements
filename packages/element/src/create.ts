@@ -1,6 +1,7 @@
 import {
+  $$_current_host_component,
   type AttributeConverter,
-  type Component,
+  Component,
   type ComponentConstructor,
   createComponent,
   type HostElementCallback,
@@ -13,7 +14,15 @@ import {
   SETUP_SYMBOL,
 } from '@maverick-js/core';
 import { render } from '@maverick-js/dom';
-import { camelToKebabCase, isArray, isString, MaverickEvent, runAll } from '@maverick-js/std';
+import {
+  camelToKebabCase,
+  cloneEvent,
+  isArray,
+  isFunction,
+  isString,
+  runAll,
+  walkPrototypeChain,
+} from '@maverick-js/std';
 
 import type { MaverickElementConstructor } from './element';
 import { ATTRS_SYMBOL, SETUP_CALLBACKS_SYMBOL, SETUP_STATE_SYMBOL } from './symbols';
@@ -27,7 +36,7 @@ const enum SetupState {
 const registry = new Set<string>();
 
 /** @internal */
-export function $$_create_custom_element(Component: ComponentConstructor) {
+export function $$_define_custom_element(Component: ComponentConstructor) {
   const name = Component.element?.name;
 
   if (__DEV__ && !name) {
@@ -38,8 +47,6 @@ export function $$_create_custom_element(Component: ComponentConstructor) {
     defineElement(Component);
     registry.add(name!);
   }
-
-  return document.createElement(name!);
 }
 
 export function defineElement(Component: ComponentConstructor) {
@@ -61,7 +68,7 @@ export function createElementClass<T extends Component>(
     static get observedAttributes(): string[] {
       if (!this[ATTRS_SYMBOL] && Component.props) {
         const map = new Map(),
-          attrs = Component.element?.attrs;
+          attrs = Component.element?.attributes;
 
         for (const propName of Object.keys(Component.props)) {
           let attr = attrs?.[propName],
@@ -84,7 +91,7 @@ export function createElementClass<T extends Component>(
       return this[ATTRS_SYMBOL] ? Array.from(this[ATTRS_SYMBOL].keys()) : [];
     }
 
-    readonly $: T;
+    readonly $!: T;
 
     [SETUP_STATE_SYMBOL] = SetupState.Idle;
     [SETUP_CALLBACKS_SYMBOL]: HostElementCallback[] | null = null;
@@ -96,10 +103,6 @@ export function createElementClass<T extends Component>(
       return this.$.$$.scope!;
     }
 
-    get attachScope(): Scope | null {
-      return this.$.$$.attachScope;
-    }
-
     get connectScope(): Scope | null {
       return this.$.$$.connectScope;
     }
@@ -108,30 +111,36 @@ export function createElementClass<T extends Component>(
       return this.$.$$.props as any;
     }
 
-    get $state() {
-      return this.$.$$.$state as any;
+    get $store() {
+      return this.$.$$.store as any;
     }
 
     get state() {
       return this.$.state as any;
     }
 
+    get isManaged() {
+      return this.hasAttribute('data-maverick');
+    }
+
     constructor() {
       super();
 
-      this.$ = scoped(() => createComponent(Component), null)!;
+      if (this.isManaged || $$_current_host_component) {
+        this.$ = $$_current_host_component as T;
+      } else {
+        this.$ = scoped(() => createComponent(Component), null)!;
 
-      this.$.$$[ON_DISPATCH_SYMBOL] = this.#dispatch.bind(this);
-
-      // Properties might be assigned before element is registered. We need to assign them
-      // to the internal prop signals and delete from proto chain.
-      if (Component.props) {
-        const props = this.$props,
-          descriptors = Object.getOwnPropertyDescriptors(this);
-        for (const prop of Object.keys(descriptors)) {
-          if (prop in Component.props) {
-            props[prop].set(this[prop]);
-            delete this[prop];
+        // Properties might be assigned before element is registered. We need to assign them
+        // to the internal prop signals and delete from proto chain.
+        if (Component.props) {
+          const props = this.$props,
+            descriptors = Object.getOwnPropertyDescriptors(this);
+          for (const prop of Object.keys(descriptors)) {
+            if (prop in Component.props) {
+              props[prop].set(this[prop]);
+              delete this[prop];
+            }
           }
         }
       }
@@ -151,6 +160,8 @@ export function createElementClass<T extends Component>(
     }
 
     connectedCallback() {
+      if (this.isManaged) return;
+
       const instance = this.$?.$$;
       if (!instance || instance.destroyed) return;
 
@@ -177,8 +188,10 @@ export function createElementClass<T extends Component>(
     }
 
     disconnectedCallback() {
+      if (this.isManaged) return;
+
       const instance = this.$?.$$;
-      if (!instance || instance.destroyed || this.hasAttribute('data-delegate')) return;
+      if (!instance || instance.destroyed) return;
 
       instance.disconnect();
 
@@ -215,6 +228,8 @@ export function createElementClass<T extends Component>(
         }
       }
 
+      this.$.$$[ON_DISPATCH_SYMBOL] = this.#dispatch.bind(this);
+
       instance.setup();
 
       if (this.$.render) {
@@ -235,13 +250,8 @@ export function createElementClass<T extends Component>(
       return this.$.subscribe(callback);
     }
 
-    #dispatch(event: MaverickEvent) {
-      this.dispatchEvent(
-        new MaverickEvent<any>(event.type, {
-          ...event,
-          trigger: event,
-        }),
-      );
+    #dispatch(event: Event) {
+      this.dispatchEvent(cloneEvent(event));
     }
 
     destroy() {
@@ -251,13 +261,16 @@ export function createElementClass<T extends Component>(
     }
   }
 
-  extendProto(MaverickElement, Component);
+  extendPrototype(MaverickElement, Component);
 
   // @ts-expect-error
   return MaverickElement;
 }
 
-function extendProto(Element: MaverickCustomElementConstructor, Component: ComponentConstructor) {
+function extendPrototype(
+  Element: MaverickCustomElementConstructor,
+  Component: ComponentConstructor,
+) {
   const ElementProto = Element.prototype;
 
   if (Component.props) {
@@ -274,6 +287,32 @@ function extendProto(Element: MaverickCustomElementConstructor, Component: Compo
       });
     }
   }
+
+  const componentProtoChain = walkPrototypeChain(Component, stopPrototypeWalk);
+
+  for (const [name, descriptor] of componentProtoChain) {
+    if (isFunction(descriptor.value)) {
+      ElementProto[name] = function (...args: any[]) {
+        return this.$[name](...args);
+      };
+    } else {
+      Object.defineProperty(ElementProto, name, {
+        ...descriptor,
+        get() {
+          return this.$[name];
+        },
+        set: descriptor.set
+          ? function (this: MaverickCustomElement, value) {
+              this.$[name] = value;
+            }
+          : undefined,
+      });
+    }
+  }
+}
+
+function stopPrototypeWalk(proto: object) {
+  return proto === Component.prototype;
 }
 
 function setup(this: MaverickCustomElement) {

@@ -37,13 +37,7 @@ export const enum AstNodeKind {
   Noop = 6,
 }
 
-export type AstNode =
-  | ElementNode
-  | ComponentNode
-  | FragmentNode
-  | TextNode
-  | ExpressionNode
-  | NoopNode;
+export type AstNode = ElementNode | ComponentNode | FragmentNode | TextNode | ExpressionNode;
 
 export interface ElementAttributes {
   attrs?: AttributeNode[];
@@ -135,11 +129,6 @@ export interface EventNode {
   delegate: boolean;
 }
 
-export interface NoopNode {
-  kind: AstNodeKind.Noop;
-  node: ts.Node;
-}
-
 export type InferTsNode<T extends AstNode> = T extends ExpressionNode ? T['expression'] : T['node'];
 
 export function createElementNode(info: Omit<ElementNode, 'kind'>): ElementNode {
@@ -166,10 +155,6 @@ export function createSpreadNode(info: Omit<SpreadNode, 'kind'>): SpreadNode {
   return info;
 }
 
-export function createNoopNode(node: ts.Node): NoopNode {
-  return { kind: AstNodeKind.Noop, node: node };
-}
-
 export function isElementNode(node: AstNode): node is ElementNode {
   return node.kind === AstNodeKind.Element;
 }
@@ -188,8 +173,4 @@ export function isTextNode(node: AstNode): node is TextNode {
 
 export function isExpressionNode(node: AstNode): node is ExpressionNode {
   return node.kind === AstNodeKind.Expression;
-}
-
-export function isNoopNode(node: AstNode): node is NoopNode {
-  return node.kind === AstNodeKind.Noop;
 }

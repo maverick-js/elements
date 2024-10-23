@@ -102,7 +102,7 @@ export function isValueImportDeclarationFrom(
 export function isValueImportSpecifier(
   specifier: ts.ImportSpecifier | undefined,
 ): specifier is ts.ImportSpecifier {
-  return !specifier?.isTypeOnly;
+  return !!specifier && !specifier.isTypeOnly;
 }
 
 export function isTypeImportSpecifier(

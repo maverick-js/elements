@@ -10,7 +10,7 @@ import { Portal } from "@maverick-js/core";
 </Portal>
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_create_component, Portal, $$_create_template } from "@maverick-js/dom";
+    "import { Portal, $$_create_component, $$_create_template } from "@maverick-js/dom";
     let $_template_1 = /* @__PURE__ */ $$_create_template("<div></div>");
     function $$_render_1({ $1 }) {
         let $_component_1 = $$_create_component($1, {

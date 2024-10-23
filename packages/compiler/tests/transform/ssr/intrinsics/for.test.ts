@@ -10,7 +10,7 @@ import { For } from '@maverick-js/core';
 </For>
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_escape, $$_ssr, $$_create_component, For } from "@maverick-js/ssr";
+    "import { For, $$_escape, $$_ssr, $$_create_component } from "@maverick-js/ssr";
     let $$_template_1 = ["<div>", " - ", "</div>"];
     $$_create_component(For, {
         "each": [0, 1, 2]
