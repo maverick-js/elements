@@ -48,6 +48,3 @@ export type MaverickElement<
       options?: boolean | EventListenerOptions,
     ): void;
   };
-
-export type InferMaverickElementComponent<T> =
-  T extends MaverickElement<infer Component> ? Component : never;

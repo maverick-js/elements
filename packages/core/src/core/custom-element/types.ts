@@ -100,4 +100,12 @@ export interface CustomElementOptions<Props = {}> {
    * Component property to attribute name and value conversions.
    */
   readonly attributes?: Attributes<Props>;
+  /**
+   * Option to define shadow DOM attachment mode:
+   *
+   * - If `true`, attaches a shadow DOM with default options.
+   * - If `false`, no shadow DOM is attached.
+   * - If `ShadowRootInit`, attaches with the specified configuration.
+   */
+  readonly shadowRoot?: boolean | ShadowRootInit;
 }

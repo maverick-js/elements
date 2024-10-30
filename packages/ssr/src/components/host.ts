@@ -6,7 +6,7 @@ import {
   type HostProps,
   type JSX,
 } from '@maverick-js/core';
-import { isString, setAttribute, unwrapDeep } from '@maverick-js/std';
+import { getShadowRootMode, isString, setAttribute, unwrapDeep } from '@maverick-js/std';
 
 import { ServerElement } from '../element/server-element';
 import { $$_signal_name_re } from '../runtime';
@@ -35,6 +35,7 @@ export function Host({ style, $style, ...props }: HostProps) {
   const isCustomElement = DEFINE_ELEMENT_SYMBOL in ctor,
     tagName = isCustomElement ? ctor.element.name : ctor.element.fallbackTag,
     $$host = new ServerElement(tagName, $$_current_host_component),
+    shadowRoot = ctor.element.shadowRoot,
     slots = getSlots();
 
   if (style || $style) {
@@ -61,5 +62,10 @@ export function Host({ style, $style, ...props }: HostProps) {
     attrs += ` style="${$$host.style.toString()}"`;
   }
 
-  return `<!$><${tagName}${attrs}>${slots.default?.() ?? ''}</${tagName}>`;
+  const slotted = slots.default?.() ?? '',
+    children = shadowRoot
+      ? `<template shadowrootmode="${getShadowRootMode(shadowRoot)}">${slotted}</template>`
+      : slotted;
+
+  return `<!$><${tagName}${attrs}>${children}</${tagName}>`;
 }

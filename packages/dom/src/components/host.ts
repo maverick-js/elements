@@ -7,9 +7,10 @@ import {
   type HostProps,
   type MaverickCustomElement,
 } from '@maverick-js/core';
+import { attachDeclarativeShadowDOM, attachShadow } from '@maverick-js/std';
 
 import { insert } from '../insert';
-import { hydration } from '../render';
+import { hydrate, hydration } from '../render';
 import { $$_attr, $$_next_element, $$_signal_name_re } from '../runtime';
 
 export function Host(props: HostProps) {
@@ -30,20 +31,34 @@ export function Host(props: HostProps) {
   if (!$$_current_host_component || !ctor) return null;
 
   const isCustomElement = DEFINE_ELEMENT_SYMBOL in ctor,
-    hostElement = createHostElement(ctor, isCustomElement)!,
+    host = createHostElement(ctor, isCustomElement)!,
     slots = getSlots();
 
-  if (slots.default) insert(hostElement, slots.default());
+  if (slots.default) {
+    let target: Node = host,
+      shadowRoot = ctor.element?.shadowRoot;
 
-  for (const name of Object.keys(props)) {
-    $$_attr(hostElement, name.replace($$_signal_name_re, ''), props[name]);
+    if (shadowRoot) {
+      if (hydration) attachDeclarativeShadowDOM(host);
+      target = host.shadowRoot ?? attachShadow(host, shadowRoot);
+    }
+
+    if (hydration && shadowRoot) {
+      hydrate(slots.default, { target });
+    } else {
+      insert(target, slots.default());
+    }
   }
 
-  $$_current_host_component.$$.attach(hostElement);
+  for (const name of Object.keys(props)) {
+    $$_attr(host, name.replace($$_signal_name_re, ''), props[name]);
+  }
+
+  $$_current_host_component.$$.attach(host);
 
   connectToHost.bind($$_current_host_component);
 
-  return hostElement;
+  return host;
 }
 
 function connectToHost(this: AnyComponent) {

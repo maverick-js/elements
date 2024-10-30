@@ -9,12 +9,14 @@ import {
   type MaverickCustomElement,
   type MaverickCustomElementConstructor,
   ON_DISPATCH_SYMBOL,
+  RENDER_SYMBOL,
   type Scope,
   scoped,
   SETUP_SYMBOL,
 } from '@maverick-js/core';
-import { render } from '@maverick-js/dom';
+import { hydrate, hydration, render } from '@maverick-js/dom';
 import {
+  attachShadow,
   camelToKebabCase,
   cloneEvent,
   isArray,
@@ -233,8 +235,20 @@ export function createElementClass<T extends Component>(
       instance.setup();
 
       if (this.$.render) {
+        let target: Node = this,
+          shadowRoot = Component.element?.shadowRoot;
+
+        if (shadowRoot) {
+          target = attachShadow(this, shadowRoot);
+        }
+
         scoped(() => {
-          render(this.$.render!, { target: this });
+          const renderer = this.$[RENDER_SYMBOL];
+          if (hydration && shadowRoot) {
+            hydrate(renderer, { target });
+          } else {
+            render(renderer, { target });
+          }
         }, instance.scope);
       }
 

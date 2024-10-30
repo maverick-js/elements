@@ -140,3 +140,22 @@ test('render function', () => {
     "
   `);
 });
+
+test('element and child components ', () => {
+  expect(
+    ssr(`
+<Host>
+  <div>Foo Content</div>
+  <Bar />
+  <Hux />
+</Host>
+    `),
+  ).toMatchInlineSnapshot(`
+    "import { $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = ["<div>Foo Content</div>", "", ""];
+    $$_create_component(Host, null, {
+        "default": () => $$_ssr($$_template_1, [$$_create_component(Bar), $$_create_component(Hux)])
+    });
+    "
+  `);
+});

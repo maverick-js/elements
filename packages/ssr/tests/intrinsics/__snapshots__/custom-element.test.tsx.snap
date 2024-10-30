@@ -1,3 +1,3 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`render 1`] = `"<!$><mk-foo data-foo="" data-maverick="" class="foo"><div>Foo Content</div><!$><mk-bar data-bar="" data-maverick="" class="bar"><div>Bar Content</div></mk-bar></mk-foo>"`;
+exports[`render 1`] = `"<!$><mk-foo data-foo="" data-maverick="" class="foo"><div>Foo Content</div><!$><mk-bar data-bar="" data-maverick="" class="bar"><div>Bar Content</div></mk-bar><!$><mk-hux data-hux="" data-maverick=""><template shadowrootmode="open"><div>Hux Content</div></template></mk-hux></mk-foo>"`;

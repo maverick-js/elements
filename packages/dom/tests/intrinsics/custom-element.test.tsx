@@ -27,6 +27,7 @@ class Foo extends Component {
       <Host data-foo>
         <div>Foo Content</div>
         <Bar />
+        <Hux />
       </Host>
     );
   }
@@ -55,13 +56,30 @@ class Bar extends Foo {
   }
 }
 
+class Hux extends Component {
+  static element: CustomElementOptions = {
+    name: 'mk-hux',
+    fallbackTag: 'div',
+    shadowRoot: true,
+  };
+
+  override render() {
+    return (
+      <Host data-hux>
+        <div>Hux Content</div>
+      </Host>
+    );
+  }
+}
+
 test('render', () => {
   render(() => <Foo />, { target });
 
   expect(target).toMatchSnapshot();
 
   const fooEl = target.querySelector('mk-foo') as MaverickElement<Foo>,
-    barEl = target.querySelector('mk-bar') as MaverickElement<Bar>;
+    barEl = target.querySelector('mk-bar') as MaverickElement<Bar>,
+    huxEl = target.querySelector('mk-hux') as MaverickElement<Hux>;
 
   expect(fooEl.foo).toBe(10);
   expect(fooEl.bar).toBeDefined();
@@ -70,4 +88,6 @@ test('render', () => {
   expect(barEl.hux).toBe(20);
   expect(barEl.bar).toBeDefined();
   expect(barEl.bux).toBeDefined();
+
+  expect(huxEl.shadowRoot?.children).toMatchSnapshot();
 });

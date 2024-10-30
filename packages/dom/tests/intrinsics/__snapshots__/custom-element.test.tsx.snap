@@ -23,6 +23,18 @@ exports[`render 1`] = `
         Bar Content
       </div>
     </mk-bar>
+    <mk-hux
+      data-hux=""
+      data-maverick=""
+    />
   </mk-foo>
 </body>
+`;
+
+exports[`render 2`] = `
+HTMLCollection [
+  <div>
+    Hux Content
+  </div>,
+]
 `;

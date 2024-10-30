@@ -14,6 +14,10 @@ export function isHTMLElement(node: any): node is HTMLElement {
   return node && node instanceof HTMLElement;
 }
 
+export function isHTMLTemplateElement(node: any): node is HTMLTemplateElement {
+  return node && node instanceof HTMLTemplateElement;
+}
+
 export function createFragment(): DocumentFragment {
   return document.createDocumentFragment();
 }
@@ -97,16 +101,30 @@ export function toggleClass(host: Element, name: string, value: unknown) {
  * @param name - The name of the slot (optional).
  */
 export function getSlottedChildren(el: HTMLElement, name?: string): Element[] {
-  const selector = name ? `slot[name="${name}"]` : 'slot:not([name])';
-  const slot = el.shadowRoot?.querySelector(selector) as HTMLSlotElement | null;
-  const childNodes = slot?.assignedNodes({ flatten: true }) ?? [];
+  const selector = name ? `slot[name="${name}"]` : 'slot:not([name])',
+    slot = el.shadowRoot?.querySelector(selector) as HTMLSlotElement | null,
+    childNodes = slot?.assignedNodes({ flatten: true }) ?? [];
+
   return Array.prototype.filter.call(childNodes, (node) => node.nodeType == 1);
 }
 
 export function attachDeclarativeShadowDOM(element: HTMLElement) {
-  const template = element.firstChild as HTMLTemplateElement;
-  const mode = template.getAttribute('shadowroot')! as 'open' | 'closed';
-  const shadowRoot = (template.parentNode as HTMLElement).attachShadow({ mode });
+  const template = element.firstElementChild;
+  if (!isHTMLTemplateElement(template)) return;
+
+  const mode = template?.getAttribute('shadowrootmode') as ShadowRootMode;
+  if (!mode) return;
+
+  const shadowRoot = element.attachShadow({ mode });
   shadowRoot.appendChild(template.content);
+
   template.remove();
+}
+
+export function attachShadow(element: HTMLElement, init: true | ShadowRootInit) {
+  return element.attachShadow(init === true ? { mode: 'open' } : init);
+}
+
+export function getShadowRootMode(init: true | ShadowRootInit): ShadowRootMode {
+  return init === true ? 'open' : init.mode;
 }

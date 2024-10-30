@@ -11,6 +11,7 @@ class Foo extends Component {
       <Host class="foo" data-foo>
         <div>Foo Content</div>
         <Bar />
+        <Hux />
       </Host>
     );
   }
@@ -26,6 +27,22 @@ class Bar extends Foo {
     return (
       <Host class="bar" data-bar>
         <div>Bar Content</div>
+      </Host>
+    );
+  }
+}
+
+class Hux extends Component {
+  static element: CustomElementOptions = {
+    name: 'mk-hux',
+    fallbackTag: 'div',
+    shadowRoot: true,
+  };
+
+  override render() {
+    return (
+      <Host data-hux>
+        <div>Hux Content</div>
       </Host>
     );
   }

@@ -2,12 +2,7 @@
 
 exports[`<Fragment> 1`] = `"<div></div><span></span><div></div>"`;
 
-exports[`multiple dynamic child expressions 1`] = `
-[
-  [Function],
-  [Function],
-]
-`;
+exports[`multiple dynamic child expressions 1`] = `"<!$><div></div><!$><span></span>"`;
 
 exports[`multiple static child elements 1`] = `"<div></div><span></span>"`;
 
