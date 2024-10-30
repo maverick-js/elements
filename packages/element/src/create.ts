@@ -139,7 +139,7 @@ export function createElementClass<T extends Component>(
           const props = this.$props,
             descriptors = Object.getOwnPropertyDescriptors(this);
           for (const prop of Object.keys(descriptors)) {
-            if (prop in Component.props) {
+            if (prop in (Component.props as any)) {
               props[prop].set(this[prop]);
               delete this[prop];
             }
@@ -276,6 +276,11 @@ export function createElementClass<T extends Component>(
   }
 
   extendPrototype(MaverickElement, Component);
+
+  if (Component.element?.extend) {
+    // @ts-expect-error
+    return Component.element.extend(MaverickElement);
+  }
 
   // @ts-expect-error
   return MaverickElement;

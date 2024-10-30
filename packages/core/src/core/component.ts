@@ -53,12 +53,14 @@ export function isComponentConstructor(value: unknown): value is ComponentConstr
 export interface AnyComponent extends Component<AnyComponentMeta> {}
 
 export interface ComponentConstructor<T extends Component = AnyComponent> {
-  readonly element?: CustomElementOptions<InferComponentProps<T>>;
+  readonly element?: CustomElementOptions<T>;
   readonly props?: InferComponentProps<T>;
   readonly state?: StoreFactory<InferComponentState<T>>;
   [DEFINE_ELEMENT_SYMBOL]?(): void;
   new (): T;
 }
+
+export type InferComponent<T> = T extends ComponentConstructor<infer Component> ? Component : never;
 
 export interface AnyComponentMeta extends ComponentMeta<any, any, any, any> {}
 
