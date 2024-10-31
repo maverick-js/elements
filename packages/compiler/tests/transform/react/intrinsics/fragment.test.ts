@@ -56,20 +56,17 @@ function Foo() {
   return <><div on:click={onClick} /></>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { ReactFragment, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        let $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onClick);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h(ReactFragment, null, $$_h("div", {
-                ref: $_ref_1
-            }));
-        }
-        return $_node_1;
+        return $$_h(ReactFragment, null, $$_h("div", {
+            ref: $_ref_1.set
+        }));
     }
     "
   `);
@@ -82,25 +79,23 @@ function Foo() {
   return <><div on:click={onA} /><span on:click={onB} /></>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { ReactFragment, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        let $_ref_1 = $$_signal(null), $_ref_2 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
+        $$_on_attach($_ref_2, $_attach_2);
         function $_attach_2(el) {
             $$_listen(el, "click", onB);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null, $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
-            return $$_h(ReactFragment, null, $$_h("div", {
-                ref: $_ref_1
-            }), $$_h("span", {
-                ref: $_ref_2
-            }));
-        }
-        return $_node_1;
+        return $$_h(ReactFragment, null, $$_h("div", {
+            ref: $_ref_1.set
+        }), $$_h("span", {
+            ref: $_ref_2.set
+        }));
     }
     "
   `);
@@ -149,33 +144,27 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
+    "import { ReactFragment, $$_signal, $$_on_attach, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_node_2 = $$_h($_render_2), $_computed_2 = $$_computed(() => b() ? $_node_2 : null), $_node_3 = $$_h($_render_3);
+        let $_ref_1 = $$_signal(null), $_computed_1 = $$_computed(() => a() ? $$_h("div", {
+            ref: $_ref_1.set
+        }) : null), $_ref_2 = $$_signal(null), $_computed_2 = $$_computed(() => b() ? $$_h("span", {
+            ref: $_ref_2.set
+        }) : null), $_node_1 = $$_h($_render_1);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("div", {
-                ref: $_ref_1
-            });
-        }
+        $$_on_attach($_ref_2, $_attach_2);
         function $_attach_2(el) {
             $$_listen(el, "click", onB);
         }
-        function $_render_2() {
-            let $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
-            return $$_h("span", {
-                ref: $_ref_2
-            });
-        }
-        function $_render_3() {
+        function $_render_1() {
             let $_expression_1 = $$_expression($_computed_1), $_expression_2 = $$_expression($_computed_2);
             return $$_h(ReactFragment, null, $_expression_1, $_expression_2);
         }
-        return $_node_3;
+        return $_node_1;
     }
     "
   `);

@@ -40,25 +40,22 @@ function Foo() {
   return <div $innerHTML={content}><span /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_content } from "@maverick-js/dom";
     import { $$_unwrap } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             dangerouslySetInnerHTML: { __html: $$_unwrap(content) }
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_content(el, "innerHTML", content);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("div", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("div", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);

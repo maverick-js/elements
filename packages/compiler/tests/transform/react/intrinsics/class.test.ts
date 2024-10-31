@@ -43,25 +43,22 @@ function Foo() {
   return <svg class={classList} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     import { $$_class } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             className: $$_class(classList)
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_attr(el, "class", classList);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);
@@ -74,25 +71,22 @@ function Foo() {
   return <svg $class={classList} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     import { $$_unwrap, $$_class } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             className: $$_class($$_unwrap(classList))
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_attr(el, "class", classList);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);
@@ -105,7 +99,7 @@ function Foo() {
   return <svg class:foo={isFoo()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     import { $$_class } from "@maverick-js/ssr";
     function Foo() {
@@ -113,19 +107,16 @@ function Foo() {
             className: $$_class("", {
                 "foo": isFoo()
             })
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_class(el, "foo", isFoo());
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);
@@ -138,7 +129,7 @@ function Foo() {
   return <svg class:foo={isFoo()} class:bar={isBar()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     import { $$_class } from "@maverick-js/ssr";
     function Foo() {
@@ -147,20 +138,17 @@ function Foo() {
                 "foo": isFoo(),
                 "bar": isBar()
             })
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_class(el, "foo", isFoo());
             $$_class(el, "bar", isBar());
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);
@@ -173,7 +161,7 @@ function Foo() {
   return <svg $class:foo={isFoo} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     import { $$_class } from "@maverick-js/ssr";
     function Foo() {
@@ -181,19 +169,16 @@ function Foo() {
             className: $$_class("", {
                 "foo": isFoo
             })
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_class(el, "foo", isFoo);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);
@@ -206,7 +191,7 @@ function Foo() {
   return <svg class="foo" $class:foo={isFoo} $class:bar={isBar} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     import { $$_class } from "@maverick-js/ssr";
     function Foo() {
@@ -215,21 +200,18 @@ function Foo() {
                 "foo": isFoo,
                 "bar": isBar
             })
-        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
+        } : null, $_ref_1 = $$_signal(null);
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_class(el, "foo", isFoo);
             $$_class(el, "bar", isBar);
         }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("svg", {
-                className: "foo",
-                ...$_ssr_attrs_1,
-                suppressHydrationWarning: true,
-                ref: $_ref_1
-            });
-        }
-        return $_node_1;
+        return $$_h("svg", {
+            className: "foo",
+            ...$_ssr_attrs_1,
+            suppressHydrationWarning: true,
+            ref: $_ref_1.set
+        });
     }
     "
   `);

@@ -103,9 +103,9 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
       if (!node.isDynamic()) {
         props.push($.createPropertyAssignment('ref', attachId));
       } else {
-        const onAttach = runtime.attachCallback(state.currentScope, attachId),
-          ref = state.render.vars.create('$_ref', runtime.ifClient(onAttach, $.null));
-        props.push($.createPropertyAssignment('ref', ref.name));
+        const refId = state.setup.vars.create('$_ref', runtime.signal($.null)).name;
+        state.setup.block.push(runtime.onAttach(refId, attachId));
+        props.push($.createPropertyAssignment('ref', $.prop(refId, 'set')));
       }
 
       const scope = node.isDynamic() ? 'setup' : 'module';

@@ -120,6 +120,10 @@ export class ReactRuntime extends Runtime {
     return this.#createCompute('memo', scope, compute, deps);
   }
 
+  signal(value: ts.Expression) {
+    return this.call('signal', [value]);
+  }
+
   computed(compute: ts.Expression | ts.Block, deps?: ts.Expression[]) {
     return this.#createCompute('computed', null, compute, deps);
   }
@@ -138,6 +142,10 @@ export class ReactRuntime extends Runtime {
 
   spread(props: ts.Expression) {
     return this.call('spread', [props]);
+  }
+
+  onAttach(ref: ts.Identifier, callback: ts.Expression) {
+    return this.call('on_attach', [ref, callback]);
   }
 
   #createCompute(

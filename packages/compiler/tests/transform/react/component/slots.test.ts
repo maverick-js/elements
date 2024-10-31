@@ -43,20 +43,17 @@ test('single static element in named slot', () => {
 
 test('single dynamic element in default slot', () => {
   expect(react('<Foo><div on:click /></Foo>')).toMatchInlineSnapshot(`
-    "import { $$_attach_callback, $$_IS_CLIENT, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h($_render_1.bind($$_component_scope))
+        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => $$_h("div", {
+                ref: $_ref_1.set
+            })
         });
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", true);
-        }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback(this, $_attach_1) : null;
-            return $$_h("div", {
-                ref: $_ref_1
-            });
         }
         return $_component_1;
     })();
@@ -66,20 +63,17 @@ test('single dynamic element in default slot', () => {
 
 test('single dynamic element in named slot', () => {
   expect(react('<Foo><div on:click slot="foo" /></Foo>')).toMatchInlineSnapshot(`
-    "import { $$_attach_callback, $$_IS_CLIENT, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_create_component(Foo, null, null, {
-            "foo": () => $$_h($_render_1.bind($$_component_scope))
+        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
+            "foo": () => $$_h("div", {
+                ref: $_ref_1.set
+            })
         });
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", true);
-        }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback(this, $_attach_1) : null;
-            return $$_h("div", {
-                ref: $_ref_1
-            });
         }
         return $_component_1;
     })();
@@ -165,39 +159,37 @@ test('multiple named namespaced slot', () => {
 
 test('fragment default slot', () => {
   expect(react(`<Foo><Fragment><div /><div /></Fragment></Foo>`)).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_h, $$_create_component, $$_memo, $$_component_scope } from "@maverick-js/react";
+    "import { ReactFragment, $$_h, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("div");
     (() => {
-        let $_component_factory_1 = () => $$_create_component(Fragment, null, null, {
+        let $_component_1 = () => $$_create_component(Fragment, null, null, {
             "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
-        }), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h($_render_1.bind($$_component_scope))
+        }), $_component_2 = $$_create_component(Foo, null, null, {
+            "default": $_component_1
         });
-        function $_render_1() {
-            let $_component_2 = $$_memo(this, $_component_factory_1);
-            return $_component_2;
-        }
-        return $_component_1;
+        return $_component_2;
     })();
     "
   `);
 });
 
 test('fragment named slot', () => {
-  expect(react(`<Foo><Fragment slot="foo"><div /><div /></Fragment></Foo>`)).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_h, $$_create_component, $$_memo, $$_component_scope } from "@maverick-js/react";
+  expect(
+    react(`<Foo><Fragment slot="foo"><div /><div /><div>{a}</div></Fragment></Foo>`),
+  ).toMatchInlineSnapshot(`
+    "import { ReactFragment, $$_h, $$_computed, $$_expression, $$_component_scope, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("div");
     (() => {
-        let $_component_factory_1 = () => $$_create_component(Fragment, null, null, {
-            "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
-        }), $_component_1 = $$_create_component(Foo, null, null, {
-            "foo": () => $$_h($_render_1.bind($$_component_scope))
+        let $_computed_1 = $$_computed(a), $_component_1 = () => $$_create_component(Fragment, null, null, {
+            "default": () => $$_h($_render_1.bind($$_component_scope))
+        }), $_component_2 = $$_create_component(Foo, null, null, {
+            "foo": $_component_1
         });
         function $_render_1() {
-            let $_component_2 = $$_memo(this, $_component_factory_1);
-            return $_component_2;
+            let $_expression_1 = $$_expression($_computed_1);
+            return $$_h(ReactFragment, null, $_static_node_1, $_static_node_2, $$_h("div", null, $_expression_1));
         }
-        return $_component_1;
+        return $_component_2;
     })();
     "
   `);
@@ -357,20 +349,17 @@ function Bar() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Bar() {
-        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $_node_1
+        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => $$_h("div", {
+                ref: $_ref_1.set
+            }, "Text")
         });
+        $$_on_attach($_ref_1, $_attach_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onClick);
-        }
-        function $_render_1() {
-            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
-            return $$_h("div", {
-                ref: $_ref_1
-            }, "Text");
         }
         return $_component_1;
     }

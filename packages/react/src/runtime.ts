@@ -1,10 +1,13 @@
 import {
   type ComponentConstructor,
+  effect,
   type FunctionComponent,
   getScope,
+  type ReadSignal,
   root,
   type Scope,
   scoped,
+  signal,
 } from '@maverick-js/core';
 import { createElement, useEffect, useMemo, useRef } from 'react';
 import type * as React from 'react';
@@ -12,6 +15,9 @@ import type * as React from 'react';
 export const $$_IS_CLIENT = typeof document !== 'undefined';
 
 export const $$_IS_SERVER = !$$_IS_CLIENT;
+
+/** @internal */
+export const $$_signal = signal;
 
 /** @internal */
 export const $$_h = createElement;
@@ -22,19 +28,14 @@ export function $$_get_scope() {
 }
 
 /** @internal */
-export function $$_attach_callback(scope: Scope | null, callback: (el: Element) => void) {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    return scoped(() => {
-      return root((dispose) => {
-        callback(ref.current!);
-        return dispose;
-      });
-    }, scope);
-  }, []);
-
-  return ref;
+export function $$_on_attach(
+  ref: ReadSignal<HTMLElement | null>,
+  callback: (el: HTMLElement) => void,
+) {
+  effect(() => {
+    let el = ref();
+    if (el) callback(el);
+  });
 }
 
 /** @internal */

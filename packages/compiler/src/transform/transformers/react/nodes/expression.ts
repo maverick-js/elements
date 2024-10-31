@@ -137,7 +137,7 @@ export function resolveExpressionChild(
       return node.name;
     } else {
       return childState.render.binds.size > 0
-        ? runtime.h($.bind(renderId, runtime.componentScope, Array.from(args).map($.id)))
+        ? runtime.h($.bind(renderId, childState.componentScope, Array.from(args).map($.id)))
         : runtime.h(renderId);
     }
   }

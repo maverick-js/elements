@@ -130,6 +130,10 @@ export class ReactTransformState {
     return this.setupScope;
   }
 
+  get componentScope() {
+    return this.runtime.componentScope;
+  }
+
   get setupScope() {
     if (this.setup.scope) {
       return this.setup.scope;

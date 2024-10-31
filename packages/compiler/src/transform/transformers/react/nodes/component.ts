@@ -2,7 +2,7 @@ import { isArray } from '@maverick-js/std';
 import { $ } from '@maverick-js/ts';
 import ts from 'typescript';
 
-import { type ComponentNode, isExpressionNode } from '../../../../parse/ast';
+import { type ComponentNode, isComponentNode, isExpressionNode } from '../../../../parse/ast';
 import { createAttachHostCallback } from '../../dom/nodes/component';
 import { createComponentProps, createComponentSlotsObject } from '../../shared/factory';
 import type { ReactTransformState, ReactVisitorContext } from '../state';
@@ -12,7 +12,7 @@ import { resolveExpressionChild } from './expression';
 export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
   const { runtime, domRuntime } = state,
     // Avoid creating a render function wrapper if not needed.
-    mode = state.isExpressionChild || state.isSlot ? 'render' : 'setup';
+    mode = state.isExpressionChild ? 'render' : 'setup';
 
   const parent = state.node;
   state.node = null; // temp remove so slots create new roots.
@@ -46,6 +46,10 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
         return childState;
       },
       (slot, childState, result, resolve) => {
+        if (isComponentNode(slot) && !isArray(result) && ts.isIdentifier(result)) {
+          return result;
+        }
+
         if (isExpressionNode(slot) && ts.isArrowFunction(slot.expression)) {
           // Pass render function identifiers directly to slot.
           if (!isArray(result)) {
@@ -78,7 +82,9 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
               ? state.setup.vars.create('$_component_factory', $.arrowFn([], component)).name
               : component,
           )
-        : component,
+        : state.isSlot
+          ? $.arrowFn([], component)
+          : component,
     ).name;
 
   state.result = componentId;

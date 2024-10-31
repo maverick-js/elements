@@ -67,7 +67,7 @@ export function transform(
     state.setup.block.push($.fn(renderId, [], render));
 
     $return = state.isSlot
-      ? runtime.h($.bind(renderId, runtime.componentScope, []))
+      ? runtime.h($.bind(renderId, state.componentScope, []))
       : state.setup.vars.create('$_node', runtime.h(renderId)).name;
   }
 
