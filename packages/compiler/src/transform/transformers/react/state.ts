@@ -1,9 +1,11 @@
+import { $ } from '@maverick-js/ts';
 import ts from 'typescript';
 
 import { type AstNode, isComponentNode, isExpressionNode } from '../../../parse/ast';
 import type { VisitorContext, Walker } from '../../../parse/walk';
 import { DomRuntime } from '../dom/runtime';
 import { Variables } from '../shared/variables';
+import { SsrRuntime } from '../ssr/runtime';
 import type { ReactNode } from './react-node';
 import { ReactRuntime } from './runtime';
 
@@ -12,6 +14,7 @@ export class ReactTransformState {
 
   readonly runtime: ReactRuntime;
   readonly domRuntime: DomRuntime;
+  readonly ssrRuntime: SsrRuntime;
 
   // Module-scope code.
   readonly module: Readonly<{
@@ -21,6 +24,7 @@ export class ReactTransformState {
 
   // Top-level setup code that should run once per initialization.
   readonly setup: Readonly<{
+    scope: ts.Identifier | null;
     vars: Variables;
     block: Array<ts.Expression | ts.FunctionDeclaration>;
   }>;
@@ -57,9 +61,19 @@ export class ReactTransformState {
 
     this.runtime = init?.runtime ?? new ReactRuntime();
     this.domRuntime = init?.domRuntime ?? new DomRuntime();
+    this.ssrRuntime = init?.ssrRuntime ?? new SsrRuntime();
 
-    this.module = init?.module ?? { vars: new Variables(), block: [] };
-    this.setup = init?.setup ?? { vars: new Variables(), block: [] };
+    this.module = init?.module ?? {
+      vars: new Variables(),
+      block: [],
+    };
+
+    this.setup = init?.setup ?? {
+      scope: null,
+      vars: new Variables(),
+      block: [],
+    };
+
     this.render = isNewRenderScope
       ? {
           args: (!isRenderFunction && init?.render?.args) || new Set(),
@@ -108,7 +122,28 @@ export class ReactTransformState {
     }
   }
 
-  getSetupBlock() {
+  get currentScope() {
+    if (this.isSlot || this.render.allArgs.size > 0) {
+      return $.id('this');
+    }
+
+    return this.setupScope;
+  }
+
+  get setupScope() {
+    if (this.setup.scope) {
+      return this.setup.scope;
+    }
+
+    const id = this.setup.vars.create('$_scope', this.runtime.getScope()).name;
+
+    // @ts-expect-error - override readonly
+    this.setup.scope = id;
+
+    return id;
+  }
+
+  get setupBlock() {
     const block: Array<ts.Expression | ts.Statement> = [];
 
     if (this.setup.vars.length > 0) {
@@ -122,7 +157,7 @@ export class ReactTransformState {
     return block;
   }
 
-  getRenderBlock() {
+  get renderBlock() {
     const block: Array<ts.Expression | ts.Statement> = [];
 
     if (this.render.vars.length > 0) {

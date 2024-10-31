@@ -12,7 +12,7 @@ import { resolveExpressionChild } from './expression';
 export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
   const { runtime, domRuntime } = state,
     // Avoid creating a render function wrapper if not needed.
-    scope = state.isExpressionChild || state.isSlot ? 'render' : 'setup';
+    mode = state.isExpressionChild || state.isSlot ? 'render' : 'setup';
 
   const parent = state.node;
   state.node = null; // temp remove so slots create new roots.
@@ -23,18 +23,18 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
       ? $props
       : domRuntime.mergeProps([...node.spreads.map((s) => s.initializer), $props]),
     propsId = node.spreads
-      ? state[scope].vars.create(
-          '$_prop',
-          scope === 'render' && props ? runtime.memo(props) : props,
+      ? state[mode].vars.create(
+          '$_spread_props',
+          mode === 'render' && props ? runtime.memo(state.currentScope, props) : props,
         ).name
       : undefined,
     listeners = !propsId
       ? createListenersCallback(node, state)
       : domRuntime.listenCallback(propsId),
     listenerId = propsId
-      ? state[scope].vars.create(
+      ? state[mode].vars.create(
           '$_listeners',
-          scope === 'render' && listeners ? runtime.memo(listeners) : listeners,
+          mode === 'render' && listeners ? runtime.memo(state.currentScope, listeners) : listeners,
         ).name
       : undefined,
     slots = createComponentSlotsObject(
@@ -62,16 +62,23 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
     ),
     onAttach = createAttachHostCallback(node, domRuntime, propsId);
 
-  const component = runtime.component(
+  const component = runtime.createComponent(
       node.name,
       propsId ?? props,
       listenerId ?? listeners,
       slots,
       onAttach,
     ),
-    componentId = state[scope].vars.create(
+    componentId = state[mode].vars.create(
       '$_component',
-      scope === 'render' ? runtime.memo(component) : component,
+      mode === 'render'
+        ? runtime.memo(
+            state.currentScope,
+            !state.render.allArgs.size && !node.spreads
+              ? state.setup.vars.create('$_component_factory', $.arrowFn([], component)).name
+              : component,
+          )
+        : component,
     ).name;
 
   state.result = componentId;

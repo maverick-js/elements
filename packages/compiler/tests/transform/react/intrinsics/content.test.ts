@@ -7,8 +7,8 @@ function Foo() {
   return <div innerHTML="<div></div>"><span /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_html, $$_h } from "@maverick-js/react";
-    let $_static_node_1 = /* @__PURE__ */ $$_h("div", $$_html("<div></div>"));
+    "import { $$_set_html, $$_h } from "@maverick-js/react";
+    let $_static_node_1 = /* @__PURE__ */ $$_h("div", $$_set_html("<div></div>"));
     function Foo() {
         return $_static_node_1;
     }
@@ -23,14 +23,9 @@ function Foo() {
   return <div innerHTML={content}><span /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_h } from "@maverick-js/react";
+    "import { $$_h } from "@maverick-js/react";
     function Foo() {
-        let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            dangerouslySetInnerHTML: { __html: content }
-        } : null;
         return $$_h("div", {
-            ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
             dangerouslySetInnerHTML: { __html: content }
         });
     }
@@ -45,17 +40,18 @@ function Foo() {
   return <div $innerHTML={content}><span /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_unwrap, $$_IS_SERVER, $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_content } from "@maverick-js/dom";
+    import { $$_unwrap } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             dangerouslySetInnerHTML: { __html: $$_unwrap(content) }
-        } : null, $_node_1 = $$_h($_render_1);
+        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_content(el, "innerHTML", content);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("div", {
                 ...$_ssr_attrs_1,
                 suppressHydrationWarning: true,

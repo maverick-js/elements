@@ -8,11 +8,11 @@ import {
 } from '@maverick-js/core';
 import * as React from 'react';
 
-import { camelToKebabCase, kebabToPascalCase } from '../../std/src/string';
-import { isFunction, isUndefined } from '../../std/src/unit';
-import { ReactScopeContext, WithScope } from './scope';
-import type { ReactBridgeProps } from './types';
-import { setRef } from './utils';
+import { camelToKebabCase, kebabToPascalCase } from '../../../std/src/string';
+import { isFunction, isUndefined } from '../../../std/src/unit';
+import { ReactScopeContext, WithScope } from '../scope';
+import type { ReactBridgeProps } from '../types';
+import { setRef } from '../utils';
 
 export interface CreateReactClientComponentOptions {
   props: Set<string>;

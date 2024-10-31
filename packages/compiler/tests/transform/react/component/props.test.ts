@@ -2,9 +2,9 @@ import { react } from '../../transform';
 
 test('single prop', () => {
   expect(react(`<Foo foo={10} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     (() => {
-        let $_component_1 = $$_component(Foo, {
+        let $_component_1 = $$_create_component(Foo, {
             "foo": 10
         });
         return $_component_1;
@@ -15,9 +15,9 @@ test('single prop', () => {
 
 test('multiple props', () => {
   expect(react(`<Foo foo={10} bar={getBar} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     (() => {
-        let $_component_1 = $$_component(Foo, {
+        let $_component_1 = $$_create_component(Foo, {
             "foo": 10,
             "bar": getBar
         });

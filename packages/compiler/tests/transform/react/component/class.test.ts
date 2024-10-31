@@ -2,10 +2,10 @@ import { react } from '../../transform';
 
 test('append', () => {
   expect(react(`<Foo class="foo" />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_append_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_append_class(host, "foo");
         });
         return $_component_1;
@@ -16,10 +16,10 @@ test('append', () => {
 
 test('static', () => {
   expect(react(`<Foo class:foo />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", true);
         });
         return $_component_1;
@@ -30,10 +30,10 @@ test('static', () => {
 
 test('multiple static', () => {
   expect(react(`<Foo class:foo={true} class:bar={false} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", true);
             $$_class(host, "bar", false);
         });
@@ -45,10 +45,10 @@ test('multiple static', () => {
 
 test('dynamic', () => {
   expect(react(`<Foo class:foo={isFoo()} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", isFoo());
         });
         return $_component_1;
@@ -59,10 +59,10 @@ test('dynamic', () => {
 
 test('multiple dynamic', () => {
   expect(react(`<Foo class:foo={isFoo()} class:bar={isBar()} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", isFoo());
             $$_class(host, "bar", isBar());
         });
@@ -74,10 +74,10 @@ test('multiple dynamic', () => {
 
 test('signal', () => {
   expect(react(`<Foo $class:foo={isFoo} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", isFoo);
         });
         return $_component_1;
@@ -88,10 +88,10 @@ test('signal', () => {
 
 test('multiple signals', () => {
   expect(react(`<Foo $class:foo={isFoo} $class:bar={isBar} />`)).toMatchInlineSnapshot(`
-    "import { $$_component } from "@maverick-js/react";
+    "import { $$_create_component } from "@maverick-js/react";
     import { $$_class } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = $$_component(Foo, null, null, null, host => {
+        let $_component_1 = $$_create_component(Foo, null, null, null, host => {
             $$_class(host, "foo", isFoo);
             $$_class(host, "bar", isBar);
         });

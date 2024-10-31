@@ -328,7 +328,26 @@ importers:
         version: 5.6.3
 
   packages/react:
+    dependencies:
+      '@maverick-js/dom':
+        specifier: workspace:^
+        version: link:../dom
+      '@maverick-js/ssr':
+        specifier: workspace:^
+        version: link:../ssr
+      '@maverick-js/std':
+        specifier: workspace:*
+        version: link:../std
     devDependencies:
+      '@edge-runtime/vm':
+        specifier: ^2.1.2
+        version: 2.1.2
+      '@maverick-js/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@maverick-js/core':
+        specifier: workspace:*
+        version: link:../core
       '@rollup/plugin-node-resolve':
         specifier: ^15.3.0
         version: 15.3.0(rollup@4.24.0)
@@ -338,6 +357,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.1
+      '@vitest/browser':
+        specifier: ^2.1.3
+        version: 2.1.3(@vitest/spy@2.1.3)(playwright@1.48.1)(typescript@5.6.3)(vite@5.4.9)(vitest@2.1.3)
+      esbuild:
+        specifier: ^0.19.12
+        version: 0.19.12
+      playwright:
+        specifier: ^1.48.1
+        version: 1.48.1
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -356,6 +384,9 @@ importers:
       rollup-plugin-esbuild:
         specifier: ^6.1.1
         version: 6.1.1(esbuild@0.19.12)(rollup@4.24.0)
+      type-fest:
+        specifier: ^4.26.1
+        version: 4.26.1
       typescript:
         specifier: ^5.6.3
         version: 5.6.3

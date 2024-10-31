@@ -20,6 +20,9 @@ const COMPONENT_CTOR_SYMBOL = /* #__PURE__ */ Symbol.for('maverick.component.cto
 export class Component<Meta extends ComponentMeta = ComponentMeta> extends ViewController<Meta> {
   static [COMPONENT_CTOR_SYMBOL] = true;
 
+  /** @internal - DO NOT USE (type holder only) */
+  $$ts__meta?: Meta;
+
   /** @internal - DO NOT USE (for jsx types only) */
   jsxProps!: JSX.ClassComponentAttributes<Meta>;
 

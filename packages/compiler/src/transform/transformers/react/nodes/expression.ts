@@ -54,7 +54,7 @@ export function Expression(node: ExpressionNode, { state }: ReactVisitorContext)
       state.result = node.expression;
     }
   } else if (ts.isArrowFunction(node.expression)) {
-    const render = state.getRenderBlock();
+    const render = state.renderBlock;
 
     if (render.length > 0) {
       const id = $.createUniqueName('$_slot'),
@@ -109,7 +109,7 @@ export function resolveExpressionChild(
   childState: ReactTransformState,
 ) {
   const { runtime } = childState,
-    render = childState.getRenderBlock();
+    render = childState.renderBlock;
 
   if (render.length > 0) {
     // can this ever be an array?
@@ -137,7 +137,7 @@ export function resolveExpressionChild(
       return node.name;
     } else {
       return childState.render.binds.size > 0
-        ? runtime.h($.bind(renderId, $.null, Array.from(args).map($.id)))
+        ? runtime.h($.bind(renderId, runtime.componentScope, Array.from(args).map($.id)))
         : runtime.h(renderId);
     }
   }

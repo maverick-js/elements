@@ -1,13 +1,12 @@
+import {
+  Component,
+  type InferComponentCssVars,
+  type InferComponentEvents,
+  type InferComponentProps,
+} from '@maverick-js/core';
+import type { InferEventDetail } from '@maverick-js/std';
 import type * as React from 'react';
 import type { PascalCase } from 'type-fest';
-
-import type {
-  Component,
-  InferComponentCSSVars,
-  InferComponentEvents,
-  InferComponentProps,
-} from '../../maverick/src/core/component';
-import type { InferEventDetail } from '../../std/src/event';
 
 export interface ReactComponent<T extends Component> {
   (props: ReactProps<T>): React.ReactNode;
@@ -25,7 +24,7 @@ export type ReactProps<
   E & {
     style?:
       | ((React.CSSProperties & { [name: `--${string}`]: string | number | null | undefined }) &
-          Optional<InferComponentCSSVars<C>>)
+          Optional<InferComponentCssVars<C>>)
       | undefined;
     part?: string | undefined;
   };
@@ -63,6 +62,3 @@ export type ReactEventCallbacks<E> = {
 };
 
 export type InferReactElement<T> = T extends ReactElementProps<any, infer E, any> ? E : never;
-
-export type InferReactComponent<T> =
-  T extends ReactProps<infer C, any> ? C : T extends ReactElementProps<infer C, any> ? C : never;

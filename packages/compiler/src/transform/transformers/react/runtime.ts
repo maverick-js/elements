@@ -39,7 +39,7 @@ export class ReactRuntime extends Runtime {
     if (isElementNode(node) && !node.isDynamic()) {
       const props =
         !node.attrs && node.content
-          ? this.html(node.content.initializer)
+          ? this.setHtml(node.content.initializer)
           : createStaticReactNodeProps(node);
 
       return this.h(
@@ -73,11 +73,11 @@ export class ReactRuntime extends Runtime {
     );
   }
 
-  attach(callback: ts.Expression) {
-    return this.call('attach', [callback]);
+  attachCallback(scope: ts.Identifier, callback: ts.Expression) {
+    return this.call('attach_callback', [scope, callback]);
   }
 
-  component(
+  createComponent(
     tagName: string,
     props?: ts.Expression,
     listeners?: ts.Expression,
@@ -85,7 +85,7 @@ export class ReactRuntime extends Runtime {
     onAttach?: ts.Expression,
   ) {
     return this.call(
-      'component',
+      'create_component',
       createNullFilledArgs([
         $.id(tagName),
         props,
@@ -104,49 +104,51 @@ export class ReactRuntime extends Runtime {
     return this.#createConditionalExpression(this.isServer, expression, falsy);
   }
 
-  html(content: ts.Expression) {
-    return this.call('html', [content]);
+  setHtml(content: ts.Expression) {
+    return this.call('set_html', [content]);
   }
 
-  memo(compute: ts.Expression, deps?: ts.Expression[]) {
-    return this.#createCompute('memo', compute, deps);
+  getScope() {
+    return this.call('get_scope');
+  }
+
+  get componentScope() {
+    return this.id('$$_component_scope');
+  }
+
+  memo(scope: ts.Expression, compute: ts.Expression, deps?: ts.Expression[]) {
+    return this.#createCompute('memo', scope, compute, deps);
   }
 
   computed(compute: ts.Expression | ts.Block, deps?: ts.Expression[]) {
-    return this.#createCompute('computed', compute, deps);
+    return this.#createCompute('computed', null, compute, deps);
   }
 
   expression(compute: ts.Expression, deps?: ts.Expression[]) {
-    return this.#createCompute('expression', compute, deps);
+    return this.#createCompute('expression', null, compute, deps);
   }
 
   appendHtml(html: ts.Expression) {
     return this.call('append_html', [html]);
   }
 
-  unwrap(expression: ts.Expression) {
-    return this.call('unwrap', [expression]);
+  style(base: ts.Expression, props: ts.ObjectLiteralElementLike[]) {
+    return this.call('style', [base, $.object(props, true)]);
   }
 
-  ssrSpread(props: ts.Expression) {
-    return this.call('ssr_spread', [props]);
+  spread(props: ts.Expression) {
+    return this.call('spread', [props]);
   }
 
-  ssrClass(base: ts.Expression, props: ts.PropertyAssignment[]) {
-    return this.call('ssr_class', props.length ? [base, $.object(props, true)] : [base]);
-  }
-
-  ssrStyle(base: ts.Expression, props: ts.PropertyAssignment[]) {
-    return this.call('ssr_style', props.length ? [base, $.object(props, true)] : [base]);
-  }
-
-  ssrAttrs(attrs: ts.Expression) {
-    return this.call('ssr_attrs', [attrs]);
-  }
-
-  #createCompute(id: string, compute: ts.Expression | ts.Block, deps?: ts.Expression[]) {
-    const callback = this.#createComputeCallback(compute);
-    return this.call(id, deps?.length ? [callback, $.array(deps)] : [callback]);
+  #createCompute(
+    id: string,
+    scope: ts.Expression | null,
+    compute: ts.Expression | ts.Block,
+    deps?: ts.Expression[],
+  ) {
+    const callback = this.#createComputeCallback(compute),
+      args = deps?.length ? [callback, $.array(deps)] : [callback];
+    return this.call(id, scope ? [scope, ...args] : args);
   }
 
   #createComputeCallback(compute: ts.Expression | ts.Block) {

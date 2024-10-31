@@ -116,7 +116,7 @@ export function reactTransform(
 
   const statements: ts.Statement[] = [];
 
-  const runtimes = [state.runtime, state.domRuntime];
+  const runtimes = [state.runtime, state.domRuntime, state.ssrRuntime];
   for (const runtime of runtimes) {
     if (runtime.identifiers.length > 0) {
       statements.push(runtime.toImportDeclaration());

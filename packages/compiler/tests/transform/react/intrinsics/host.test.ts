@@ -10,11 +10,11 @@ import { Host } from '@maverick-js/core';
 </Host>
     `),
   ).toMatchInlineSnapshot(`
-    "import { Host, $$_h, $$_IS_CLIENT, $$_component } from "@maverick-js/react";
+    "import { Host, $$_h, $$_IS_CLIENT, $$_create_component } from "@maverick-js/react";
     import { $$_listen, $$_class, $$_style } from "@maverick-js/dom";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div", null, "...");
     (() => {
-        let $_component_1 = $$_component(Host, {
+        let $_component_1 = $$_create_component(Host, {
             "autofocus": true,
             "$title": title
         }, $$_IS_CLIENT && (instance => {

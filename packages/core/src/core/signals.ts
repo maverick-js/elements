@@ -23,6 +23,8 @@ export {
   createScope,
   computed,
   getScope,
+  getContext,
+  setContext,
   isReadSignal,
   isWriteSignal,
   onDispose,

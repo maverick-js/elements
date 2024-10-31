@@ -31,7 +31,7 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
       hoistRender(node, state);
     }
   } else {
-    const scope = state.isExpressionChild ? 'render' : 'setup';
+    const mode = state.isExpressionChild ? 'render' : 'setup';
 
     let el = $.id('el'),
       props: ts.ObjectLiteralElementLike[] = [],
@@ -43,20 +43,24 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
         createElementSpreadProps(node),
       ]);
 
-      const propsId = state[scope].vars.create(
-        '$_props',
-        scope === 'render'
+      const propsId = state[mode].vars.create(
+        '$_spread_props',
+        mode === 'render'
           ? runtime.memo(
+              state.currentScope,
               mergedProps,
               node.spreads.map((s) => s.initializer).filter(isAccessExpression),
             )
           : mergedProps,
       ).name;
 
-      const ssrProps = runtime.ssrSpread(propsId),
-        ssrPropsId = state[scope].vars.create(
+      const ssrProps = runtime.spread(propsId),
+        ssrPropsId = state[mode].vars.create(
           '$_ssr_props',
-          runtime.ifServer(scope === 'render' ? runtime.memo(ssrProps, [propsId]) : ssrProps),
+          runtime.ifServer(
+            mode === 'render' ? runtime.memo(state.currentScope, ssrProps, [propsId]) : ssrProps,
+            $.null,
+          ),
         ).name;
 
       attach.push(domRuntime.spread(el, propsId));
@@ -71,9 +75,12 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
 
       if (ssrProps.length > 0) {
         const ssrAttrs = $.object(ssrProps, true),
-          ssrAttrsId = state[scope].vars.create(
+          ssrAttrsId = state[mode].vars.create(
             '$_ssr_attrs',
-            runtime.ifServer(scope === 'render' ? runtime.memo(ssrAttrs) : ssrAttrs, $.null),
+            runtime.ifServer(
+              mode === 'render' ? runtime.memo(state.currentScope, ssrAttrs) : ssrAttrs,
+              $.null,
+            ),
           ).name;
 
         props.push($.createSpreadAssignment(ssrAttrsId));
@@ -96,8 +103,8 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
       if (!node.isDynamic()) {
         props.push($.createPropertyAssignment('ref', attachId));
       } else {
-        const onAttach = runtime.attach(attachId),
-          ref = state.render.vars.create('$_ref', onAttach);
+        const onAttach = runtime.attachCallback(state.currentScope, attachId),
+          ref = state.render.vars.create('$_ref', runtime.ifClient(onAttach, $.null));
         props.push($.createPropertyAssignment('ref', ref.name));
       }
 
@@ -191,7 +198,7 @@ function getClientProps(
   return { props, attach };
 }
 
-export function getSsrProps(node: ElementNode, { runtime }: ReactTransformState) {
+export function getSsrProps(node: ElementNode, { runtime, ssrRuntime }: ReactTransformState) {
   let classNode: AttributeNode | null = null,
     stylesNode: AttributeNode | null = null,
     props: ts.PropertyAssignment[] = [];
@@ -201,7 +208,7 @@ export function getSsrProps(node: ElementNode, { runtime }: ReactTransformState)
     props.push(
       $.createPropertyAssignment(
         $.string(name),
-        attr.signal ? runtime.unwrap(attr.initializer) : attr.initializer,
+        attr.signal ? ssrRuntime.unwrap(attr.initializer) : attr.initializer,
       ),
     );
   }
@@ -221,56 +228,51 @@ export function getSsrProps(node: ElementNode, { runtime }: ReactTransformState)
   if (node.classes) {
     const base =
         classNode?.signal && classNode.initializer
-          ? runtime.unwrap(classNode.initializer)
+          ? ssrRuntime.unwrap(classNode.initializer)
           : (classNode?.initializer ?? $.string('')),
       $classProps = node.classes?.map((c) =>
-        $.createPropertyAssignment(
-          $.string(c.name),
-          c.signal ? runtime.unwrap(c.initializer) : c.initializer,
-        ),
+        $.createPropertyAssignment($.string(c.name), c.initializer),
       ),
-      classProps = $classProps ? runtime.ssrClass(base, $classProps) : base;
+      classProps = $classProps ? ssrRuntime.class(base, $classProps) : base;
 
     props.push($.createPropertyAssignment('className', classProps));
   } else if (classNode) {
-    const value = classNode.signal ? runtime.unwrap(classNode.initializer) : classNode.initializer;
-    props.push($.createPropertyAssignment('className', runtime.ssrClass(value, [])));
+    const value = classNode.signal
+      ? ssrRuntime.unwrap(classNode.initializer)
+      : classNode.initializer;
+    props.push($.createPropertyAssignment('className', ssrRuntime.class(value, [])));
   }
 
   if (node.styles || node.vars) {
     const base =
         stylesNode?.signal && stylesNode.initializer
-          ? runtime.unwrap(stylesNode.initializer)
+          ? ssrRuntime.unwrap(stylesNode.initializer)
           : (stylesNode?.initializer ?? $.string('')),
       $styleProps = node.styles?.map((s) =>
-        $.createPropertyAssignment(
-          $.string(s.name),
-          s.signal ? runtime.unwrap(s.initializer) : s.initializer,
-        ),
+        $.createPropertyAssignment($.string(s.name), s.initializer),
       ),
       $varProps = node.vars?.map((s) =>
-        $.createPropertyAssignment(
-          $.string(`--${s.name}`),
-          s.signal ? runtime.unwrap(s.initializer) : s.initializer,
-        ),
+        $.createPropertyAssignment($.string(`--${s.name}`), s.initializer),
       ),
       styleProps =
         $styleProps || $varProps
-          ? runtime.ssrStyle(base, [...($styleProps ?? []), ...($varProps ?? [])])
+          ? runtime.style(base, [...($styleProps ?? []), ...($varProps ?? [])])
           : base;
 
     props.push($.createPropertyAssignment('style', styleProps));
   } else if (stylesNode) {
     const value = stylesNode.signal
-      ? runtime.unwrap(stylesNode.initializer)
+      ? ssrRuntime.unwrap(stylesNode.initializer)
       : stylesNode.initializer;
-    props.push($.createPropertyAssignment('style', runtime.ssrStyle(value, [])));
+    props.push($.createPropertyAssignment('style', runtime.style(value, [])));
   }
 
-  if (node.content) {
+  if (node.content && node.content.signal) {
     props.push(
       createDangerouslySetInnerHTMLProp(
-        node.content.signal ? runtime.unwrap(node.content.initializer) : node.content.initializer,
+        node.content.signal
+          ? ssrRuntime.unwrap(node.content.initializer)
+          : node.content.initializer,
       ),
     );
   }

@@ -1,13 +1,12 @@
-import * as React from 'react';
-
-import { isArray } from '../../../../std/src';
 import {
   type AnyRecord,
   effect,
   type ReadSignalRecord,
   signal,
   type WriteSignal,
-} from '../../core';
+} from '@maverick-js/core';
+import { isArray } from '@maverick-js/std';
+import * as React from 'react';
 
 export function useSignalRecord<T extends AnyRecord>($state: ReadSignalRecord<T>): T {
   const [, scheduleReactUpdate] = React.useState<{}>(),

@@ -56,15 +56,15 @@ function Foo() {
   return <><div on:click={onClick} /></>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_attach, $$_h } from "@maverick-js/react";
+    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onClick);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h(ReactFragment, null, $$_h("div", {
                 ref: $_ref_1
             }));
@@ -82,10 +82,10 @@ function Foo() {
   return <><div on:click={onA} /><span on:click={onB} /></>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_attach, $$_h } from "@maverick-js/react";
+    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
@@ -93,7 +93,7 @@ function Foo() {
             $$_listen(el, "click", onB);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1), $_ref_2 = $$_attach($_attach_2);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null, $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
             return $$_h(ReactFragment, null, $$_h("div", {
                 ref: $_ref_1
             }), $$_h("span", {
@@ -149,15 +149,15 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_attach, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
+    "import { ReactFragment, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_node_2 = $$_h($_render_2), $_computed_2 = $$_computed(() => b() ? $_node_2 : null), $_node_3 = $$_h($_render_3);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_node_2 = $$_h($_render_2), $_computed_2 = $$_computed(() => b() ? $_node_2 : null), $_node_3 = $$_h($_render_3);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("div", {
                 ref: $_ref_1
             });
@@ -166,7 +166,7 @@ function Foo() {
             $$_listen(el, "click", onB);
         }
         function $_render_2() {
-            let $_ref_2 = $$_attach($_attach_2);
+            let $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
             return $$_h("span", {
                 ref: $_ref_2
             });
@@ -196,10 +196,10 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { Fragment, ReactFragment, $$_h, $$_component } from "@maverick-js/react";
+    "import { Fragment, ReactFragment, $$_h, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("span");
     function Foo() {
-        let $_component_1 = $$_component(Fragment, null, null, {
+        let $_component_1 = $$_create_component(Fragment, null, null, {
             "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
         });
         return ($_component_1);

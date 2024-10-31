@@ -58,7 +58,7 @@ export function transform(
     return $return;
   }
 
-  const render = state.getRenderBlock();
+  const render = state.renderBlock;
 
   if (render.length > 0) {
     render.push($.createReturnStatement($return));
@@ -66,15 +66,16 @@ export function transform(
     const renderId = $.createUniqueName('$_render');
     state.setup.block.push($.fn(renderId, [], render));
 
-    const node = state.setup.vars.create('$_node', runtime.h(renderId));
-    $return = node.name;
+    $return = state.isSlot
+      ? runtime.h($.bind(renderId, runtime.componentScope, []))
+      : state.setup.vars.create('$_node', runtime.h(renderId)).name;
   }
 
-  // Don't build setup for child states.
+  // Don't build setup block for child states.
   if (state.isChild) {
     return $return;
   }
 
-  const setup = state.getSetupBlock();
+  const setup = state.setupBlock;
   return setup.length > 0 ? [...setup, $return] : $return;
 }

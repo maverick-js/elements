@@ -1,4 +1,6 @@
 /// <reference types="vitest" />
+import { createReactTransform } from '@maverick-js/compiler';
+import { maverick } from '@maverick-js/compiler/vite';
 import { defineConfig } from 'vite';
 
 const SERVER = !!process.env.SERVER;
@@ -14,10 +16,27 @@ export default defineConfig({
       '@maverick-js/react': '/src/index.ts',
     },
   },
+  plugins: [
+    maverick({
+      transform: createReactTransform(),
+    }),
+  ],
   // https://vitest.dev/config
-  test: {
-    include: [`tests/${SERVER ? 'server' : 'client'}/**/*.test.{ts,tsx}`],
-    globals: true,
-    environment: SERVER ? 'edge-runtime' : 'happy-dom',
-  },
+  test: !SERVER
+    ? {
+        include: [`tests/client/**/*.test.{ts,tsx}`],
+        globals: true,
+        browser: {
+          enabled: true,
+          headless: true,
+          provider: 'playwright',
+          name: 'chromium',
+          screenshotFailures: false,
+        },
+      }
+    : {
+        include: [`tests/server/**/*.test.{ts,tsx}`],
+        globals: true,
+        environment: 'edge-runtime',
+      },
 });

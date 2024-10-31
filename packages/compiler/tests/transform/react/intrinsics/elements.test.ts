@@ -72,15 +72,15 @@ function Foo() {
   return <div><span on:click={onClick} /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onClick);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("div", null, $$_h("span", {
                 ref: $_ref_1
             }));
@@ -98,10 +98,10 @@ function Foo() {
   return <div><span on:click={onA} /><span on:click={onB} /></div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
@@ -109,7 +109,7 @@ function Foo() {
             $$_listen(el, "click", onB);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1), $_ref_2 = $$_attach($_attach_2);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null, $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
             return $$_h("div", null, $$_h("span", {
                 ref: $_ref_1
             }), $$_h("span", {
@@ -165,15 +165,15 @@ function Foo() {
   return <div>{a() ? <div on:click={onA} /> : null}{b() ? <span on:click={onB} /> : null}</div>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_attach, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
+    "import { $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h, $$_computed, $$_expression } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_node_2 = $$_h($_render_2), $_computed_2 = $$_computed(() => b() ? $_node_2 : null), $_node_3 = $$_h($_render_3);
+        let $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_node_2 = $$_h($_render_2), $_computed_2 = $$_computed(() => b() ? $_node_2 : null), $_node_3 = $$_h($_render_3);
         function $_attach_1(el) {
             $$_listen(el, "click", onA);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("div", {
                 ref: $_ref_1
             });
@@ -182,7 +182,7 @@ function Foo() {
             $$_listen(el, "click", onB);
         }
         function $_render_2() {
-            let $_ref_2 = $$_attach($_attach_2);
+            let $_ref_2 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_2) : null;
             return $$_h("span", {
                 ref: $_ref_2
             });

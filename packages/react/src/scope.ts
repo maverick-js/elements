@@ -1,9 +1,11 @@
-import { getContext } from '@maverick-js/signals';
+import {
+  type Context,
+  createScope,
+  getContext,
+  provideContext,
+  type Scope,
+} from '@maverick-js/core';
 import * as React from 'react';
-
-import { type Context, provideContext } from '../../maverick/src/core/context';
-import { createScope } from '../../maverick/src/core/signals';
-import type { Scope } from '../../maverick/src/core/signals';
 
 export interface ReactScopeProvider {
   new (props: React.PropsWithChildren): React.Component<React.PropsWithChildren>;
@@ -43,8 +45,8 @@ export function createReactContextProvider<T>(
   provide?: () => T,
 ): ReactContextProvider {
   return class ContextProvider extends ScopeProvider {
-    static override #context = context;
-    static override #provide = provide;
+    static override context = context;
+    static override provide = provide;
   };
 }
 
@@ -52,8 +54,8 @@ class ScopeProvider extends React.Component<React.PropsWithChildren> {
   static override contextType = ReactScopeContext;
   declare context: React.ContextType<typeof ReactScopeContext>;
 
-  static #context?: Context<unknown>;
-  static #provide?: () => unknown;
+  static context?: Context<unknown>;
+  static provide?: () => unknown;
 
   #scope: ReactScopeRef;
 
@@ -67,7 +69,7 @@ class ScopeProvider extends React.Component<React.PropsWithChildren> {
     if (context) context.append(this.#scope.current!);
 
     const Ctor = this.constructor as typeof ScopeProvider;
-    if (Ctor.#context) provideContext(Ctor.#context, Ctor.#provide?.(), this.#scope.current!);
+    if (Ctor.context) provideContext(Ctor.context, Ctor.provide?.(), this.#scope.current!);
   }
 
   override render() {

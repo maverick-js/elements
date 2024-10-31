@@ -48,19 +48,19 @@ function Foo() {
   return <svg var:foo={getFoo()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_ssr_style, $$_IS_SERVER, $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_ssr_style("", {
+            style: $$_style("", {
                 "--foo": getFoo()
             })
-        } : null, $_node_1 = $$_h($_render_1);
+        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_style(el, "--foo", getFoo());
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("svg", {
                 ...$_ssr_attrs_1,
                 suppressHydrationWarning: true,
@@ -80,21 +80,21 @@ function Foo() {
   return <svg var:foo={getFoo()} var:bar={getBar()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_ssr_style, $$_IS_SERVER, $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_ssr_style("", {
+            style: $$_style("", {
                 "--foo": getFoo(),
                 "--bar": getBar()
             })
-        } : null, $_node_1 = $$_h($_render_1);
+        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_style(el, "--foo", getFoo());
             $$_style(el, "--bar", getBar());
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("svg", {
                 ...$_ssr_attrs_1,
                 suppressHydrationWarning: true,
@@ -114,19 +114,19 @@ function Foo() {
   return <svg $var:foo={foo} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_unwrap, $$_ssr_style, $$_IS_SERVER, $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_ssr_style("", {
-                "--foo": $$_unwrap(foo)
+            style: $$_style("", {
+                "--foo": foo
             })
-        } : null, $_node_1 = $$_h($_render_1);
+        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_style(el, "--foo", foo);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("svg", {
                 ...$_ssr_attrs_1,
                 suppressHydrationWarning: true,
@@ -146,21 +146,21 @@ function Foo() {
   return <svg $var:foo={foo} $var:bar={bar}/>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_unwrap, $$_ssr_style, $$_IS_SERVER, $$_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_get_scope, $$_attach_callback, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_ssr_style("", {
-                "--foo": $$_unwrap(foo),
-                "--bar": $$_unwrap(bar)
+            style: $$_style("", {
+                "--foo": foo,
+                "--bar": bar
             })
-        } : null, $_node_1 = $$_h($_render_1);
+        } : null, $_scope_1 = $$_get_scope(), $_node_1 = $$_h($_render_1);
         function $_attach_1(el) {
             $$_style(el, "--foo", foo);
             $$_style(el, "--bar", bar);
         }
         function $_render_1() {
-            let $_ref_1 = $$_attach($_attach_1);
+            let $_ref_1 = $$_IS_CLIENT ? $$_attach_callback($_scope_1, $_attach_1) : null;
             return $$_h("svg", {
                 ...$_ssr_attrs_1,
                 suppressHydrationWarning: true,
