@@ -108,26 +108,6 @@ export class ReactRuntime extends Runtime {
     return this.call('set_html', [content]);
   }
 
-  getScope() {
-    return this.call('get_scope');
-  }
-
-  get componentScope() {
-    return this.id('$$_component_scope');
-  }
-
-  memo(scope: ts.Expression, compute: ts.Expression, deps?: ts.Expression[]) {
-    return this.#createCompute('memo', scope, compute, deps);
-  }
-
-  signal(value: ts.Expression) {
-    return this.call('signal', [value]);
-  }
-
-  computed(compute: ts.Expression | ts.Block, deps?: ts.Expression[]) {
-    return this.#createCompute('computed', null, compute, deps);
-  }
-
   expression(compute: ts.Expression, deps?: ts.Expression[]) {
     return this.#createCompute('expression', null, compute, deps);
   }

@@ -1,16 +1,22 @@
 import {
+  $$_current_slots,
+  $$_priority_attach,
+  $$_set_current_host_component,
+  $$_set_current_slots,
   type ComponentConstructor,
+  createComponent,
   effect,
   type FunctionComponent,
-  getScope,
+  isComponentConstructor,
+  peek,
   type ReadSignal,
-  root,
+  RENDER_SYMBOL,
   type Scope,
-  scoped,
   signal,
+  type Slot,
+  type SlotRecord,
 } from '@maverick-js/core';
-import { createElement, useEffect, useMemo, useRef } from 'react';
-import type * as React from 'react';
+import { createElement } from 'react';
 
 export const $$_IS_CLIENT = typeof document !== 'undefined';
 
@@ -21,11 +27,6 @@ export const $$_signal = signal;
 
 /** @internal */
 export const $$_h = createElement;
-
-/** @internal */
-export function $$_get_scope() {
-  return getScope()!;
-}
 
 /** @internal */
 export function $$_on_attach(
@@ -42,6 +43,9 @@ export function $$_on_attach(
 export let $$_component_scope: Scope | null = null;
 
 /** @internal */
+export const $$_slot_stack: Array<SlotRecord | null> = [];
+
+/** @internal */
 export const $$_component_scope_stack: Array<Scope | null> = [];
 
 /** @internal */
@@ -49,21 +53,37 @@ export function $$_create_component(
   Component: FunctionComponent | ComponentConstructor,
   props: Record<string, unknown> | null = null,
   listen: ((target: EventTarget) => void) | null = null,
-  slots: Record<string, () => React.ReactNode> | null = null,
+  slots: Record<string, Slot> | null = null,
   onAttach: ((host: HTMLElement) => void) | null = null,
 ) {
-  try {
-    $$_component_scope_stack.push($$_component_scope);
+  return peek(() => {
+    try {
+      $$_slot_stack.push($$_current_slots);
+      $$_component_scope_stack.push($$_component_scope);
 
-    // before set scope
-    // render
-  } finally {
-    $$_component_scope = $$_component_scope_stack.pop()!;
-  }
+      $$_set_current_slots(slots ?? {});
 
-  // setup code here
-  // slots need to be scoped!
-  // return render function result
+      if (isComponentConstructor(Component)) {
+        const component = createComponent(Component, { props });
+
+        $$_component_scope = component.scope;
+        $$_set_current_host_component(component);
+
+        listen?.(component);
+        if (onAttach) $$_priority_attach(component, onAttach);
+
+        component.$$.setup();
+
+        // TODO: What if render returns function? return $$_expression? (update below as well)
+        return component[RENDER_SYMBOL]();
+      } else {
+        return Component(props ?? {});
+      }
+    } finally {
+      $$_component_scope = $$_component_scope_stack.pop()!;
+      $$_set_current_slots($$_slot_stack.pop()!);
+    }
+  });
 }
 
 /** @internal */
@@ -71,29 +91,20 @@ export function $$_set_html(__html: string) {
   return { dangerouslySetInnerHTML: { __html } };
 }
 
-/** @internal */
-export function $$_memo<T>(scope: Scope | null, factory: () => T, deps: unknown[] = []) {
-  return useMemo(() => scoped(factory, scope), deps);
-}
-
-// scoped
-// computed(compute: ts.Expression | ts.Block, deps?: ts.Expression[]) {
-//   return this.#createCompute('computed', compute, deps);
-// }
-
-// scoped
 // expression(compute: ts.Expression, deps?: ts.Expression[]) {
 //   return this.#createCompute('expression', compute, deps);
 // }
 
-// appendHtml(html: ts.Expression) {
-//   return this.call('append_html', [html]);
-// }
+/** @internal */
+export function $$_append_html(template: () => Node) {
+  return (el: Node) => {
+    el.appendChild(template());
+  };
+}
 
 // ~= merge_attrs (filter out namespaces and map to react props)
-// $$_merge_attrs(props: ts.Expression) {
+// $$_spread(props: ts.Expression) {
 // }
 
-// peek
 // $$_style(base: ts.Expression, props?: ts.PropertyAssignment[]) {
 // }
