@@ -1,7 +1,7 @@
 import type { Constructor } from 'type-fest';
 
 const EVENT: Constructor<Event> = __SERVER__ ? (class Event {} as any) : Event,
-  MAVERICK_EVENT_SYMBOL = Symbol.for('maverick.event');
+  MAVERICK_EVENT_SYMBOL = Symbol.for('mk.event');
 
 export interface MaverickEventInit<Detail = unknown> extends EventInit {
   readonly detail: Detail;

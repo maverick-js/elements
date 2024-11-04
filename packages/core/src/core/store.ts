@@ -5,7 +5,7 @@ import { computed, type ReadSignal, signal, type WriteSignal } from './signals';
 import type { AnyRecord, ReadSignalRecord } from './types';
 
 export class StoreFactory<Record> {
-  readonly id = Symbol('maverick.store');
+  readonly id = Symbol('mk.store');
   readonly record: Record;
 
   #descriptors: {

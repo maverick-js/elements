@@ -151,7 +151,7 @@ export function $$_listen_callback(props: Record<string, any>) {
   };
 }
 
-const DELEGATED_EVENTS_SYMBOL = /* #__PURE__ */ Symbol.for('maverick.delegated_events');
+const DELEGATED_EVENTS_SYMBOL = /* #__PURE__ */ Symbol.for('mk.delegated_events');
 
 /** @internal */
 export function $$_delegate_events(types: string[]) {

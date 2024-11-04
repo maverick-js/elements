@@ -15,7 +15,7 @@ import { type Dispose, effect, type Maybe, scoped } from './signals';
 import type { StoreFactory } from './store';
 import type { DEFINE_ELEMENT_SYMBOL } from './symbols';
 
-const COMPONENT_CTOR_SYMBOL = /* #__PURE__ */ Symbol.for('maverick.component.ctor');
+const COMPONENT_CTOR_SYMBOL = /* #__PURE__ */ Symbol.for('mk.component.ctor');
 
 export class Component<Meta extends ComponentMeta = ComponentMeta> extends ViewController<Meta> {
   static [COMPONENT_CTOR_SYMBOL] = true;

@@ -2,11 +2,11 @@ import type { MaverickEvent } from '@maverick-js/std';
 
 import { $$_current_instance } from './instance';
 
-export const SETUP_SYMBOL = Symbol.for('maverick.setup');
-export const ATTACH_SYMBOL = Symbol.for('maverick.attach');
-export const CONNECT_SYMBOL = Symbol.for('maverick.connect');
-export const DESTROY_SYMBOL = Symbol.for('maverick.destroy');
-export const RENDER_SYMBOL = Symbol.for('maverick.render');
+export const SETUP_SYMBOL = Symbol.for('mk.setup');
+export const ATTACH_SYMBOL = Symbol.for('mk.attach');
+export const CONNECT_SYMBOL = Symbol.for('mk.connect');
+export const DESTROY_SYMBOL = Symbol.for('mk.destroy');
+export const RENDER_SYMBOL = Symbol.for('mk.render');
 
 export const componentLifecycleSymbols = [
   SETUP_SYMBOL,

@@ -9,7 +9,7 @@ export interface Context<T> {
 }
 
 export function createContext<T>(provide?: () => T): Context<T> {
-  return { id: Symbol('maverick.context'), provide };
+  return { id: Symbol('mk.context'), provide };
 }
 
 export function provideContext<T>(context: Context<T>, value?: T, scope: Scope = getScope()!) {
