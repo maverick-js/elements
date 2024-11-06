@@ -1,5 +1,5 @@
 import { trimQuotes } from '@maverick-js/std';
-import { $, isAccessExpression } from '@maverick-js/ts';
+import { $ } from '@maverick-js/ts';
 import type ts from 'typescript';
 
 import {
@@ -31,8 +31,6 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
       hoistRender(node, state);
     }
   } else {
-    const mode = state.isExpressionChild ? 'render' : 'setup';
-
     let el = $.id('el'),
       props: ts.ObjectLiteralElementLike[] = [],
       attach: ts.Expression[] = [];
@@ -43,27 +41,22 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
         createElementSpreadProps(node),
       ]);
 
-      const propsId = state[mode].vars.create(
-        '$_spread_props',
-        mode === 'render'
-          ? runtime.memo(
-              state.currentScope,
-              mergedProps,
-              node.spreads.map((s) => s.initializer).filter(isAccessExpression),
-            )
-          : mergedProps,
-      ).name;
+      const propsId = state.setup.vars.create('$_spread_props', mergedProps).name;
 
-      const ssrProps = runtime.spread(propsId),
-        ssrPropsId = state[mode].vars.create(
+      const ssrProps = runtime.ssrSpread(propsId),
+        ssrPropsId = state.setup.vars.create(
           '$_ssr_props',
-          runtime.ifServer(
-            mode === 'render' ? runtime.memo(state.currentScope, ssrProps, [propsId]) : ssrProps,
-            $.null,
-          ),
+          runtime.ifServer(ssrProps, $.null),
         ).name;
 
       attach.push(domRuntime.spread(el, propsId));
+
+      props.push(
+        $.createPropertyAssignment(
+          $.createComputedPropertyName(runtime.suppressHydrationWarning),
+          $.createTrue(),
+        ),
+      );
 
       props.push($.createSpreadAssignment(ssrPropsId));
     } else {
@@ -75,16 +68,19 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
 
       if (ssrProps.length > 0) {
         const ssrAttrs = $.object(ssrProps, true),
-          ssrAttrsId = state[mode].vars.create(
+          ssrAttrsId = state.setup.vars.create(
             '$_ssr_attrs',
-            runtime.ifServer(
-              mode === 'render' ? runtime.memo(state.currentScope, ssrAttrs) : ssrAttrs,
-              $.null,
-            ),
+            runtime.ifServer(ssrAttrs, $.null),
           ).name;
 
         props.push($.createSpreadAssignment(ssrAttrsId));
-        props.push($.createPropertyAssignment('suppressHydrationWarning', $.createTrue()));
+
+        props.push(
+          $.createPropertyAssignment(
+            $.createComputedPropertyName(runtime.suppressHydrationWarning),
+            $.createTrue(),
+          ),
+        );
       }
     }
 
@@ -98,18 +94,24 @@ export function Element(node: ElementNode, { state, walk }: ReactVisitorContext)
 
     if (attach.length > 0) {
       const attachId = $.createUniqueName('$_attach'),
-        attachCallback = $.fn(attachId, [el], attach);
+        attachCallback = $.fn(attachId, [el], attach),
+        block: ts.Statement[] = [];
 
       if (!node.isDynamic()) {
         props.push($.createPropertyAssignment('ref', attachId));
       } else {
-        const refId = state.setup.vars.create('$_ref', runtime.signal($.null)).name;
-        state.setup.block.push(runtime.onAttach(refId, attachId));
+        const refId = state.setup.vars.create('$_ref', runtime.ref()).name;
+        block.push($.createExpressionStatement(runtime.onAttach(refId, attachId)));
         props.push($.createPropertyAssignment('ref', $.prop(refId, 'set')));
       }
 
-      const scope = node.isDynamic() ? 'setup' : 'module';
-      state[scope].block.push(attachCallback);
+      if (node.isDynamic()) {
+        block.push(attachCallback);
+        state.setup.block.push($.if(runtime.isClient, block));
+      } else {
+        state.setup.block.push(...block);
+        state.module.block.push(attachCallback);
+      }
     }
 
     // Hoist static props.

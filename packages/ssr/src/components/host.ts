@@ -9,7 +9,7 @@ import {
 import { getShadowRootMode, isString, setAttribute, unwrapDeep } from '@maverick-js/std';
 
 import { ServerElement } from '../element/server-element';
-import { $$_signal_name_re } from '../runtime';
+import { $$_signal_name_re, $$_unwrap_slot } from '../runtime';
 
 export interface HostComponentAttrs {
   class?: string;
@@ -62,7 +62,7 @@ export function Host({ style, $style, ...props }: HostProps) {
     attrs += ` style="${$$host.style.toString()}"`;
   }
 
-  const slotted = slots.default?.() ?? '',
+  const slotted = $$_unwrap_slot(slots.default?.()) ?? '',
     children = shadowRoot
       ? `<template shadowrootmode="${getShadowRootMode(shadowRoot)}">${slotted}</template>`
       : slotted;

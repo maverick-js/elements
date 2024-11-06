@@ -48,21 +48,23 @@ function Foo() {
   return <svg var:foo={getFoo()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style("", {
                 "--foo": getFoo()
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "--foo", getFoo());
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "--foo", getFoo());
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -77,7 +79,7 @@ function Foo() {
   return <svg var:foo={getFoo()} var:bar={getBar()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
@@ -85,15 +87,17 @@ function Foo() {
                 "--foo": getFoo(),
                 "--bar": getBar()
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "--foo", getFoo());
-            $$_style(el, "--bar", getBar());
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "--foo", getFoo());
+                $$_style(el, "--bar", getBar());
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -108,21 +112,23 @@ function Foo() {
   return <svg $var:foo={foo} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style("", {
                 "--foo": foo
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "--foo", foo);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "--foo", foo);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -137,7 +143,7 @@ function Foo() {
   return <svg $var:foo={foo} $var:bar={bar}/>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
@@ -145,15 +151,17 @@ function Foo() {
                 "--foo": foo,
                 "--bar": bar
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "--foo", foo);
-            $$_style(el, "--bar", bar);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "--foo", foo);
+                $$_style(el, "--bar", bar);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }

@@ -1,10 +1,10 @@
 import { effect, type ReadSignal } from '@maverick-js/core';
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 
 export function useSignal<T>(signal: ReadSignal<T>, key?: unknown): T {
-  const [, scheduleReactUpdate] = React.useState<{}>();
+  const [, scheduleReactUpdate] = useState<{}>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     return effect(() => {
       signal();
       scheduleReactUpdate({});

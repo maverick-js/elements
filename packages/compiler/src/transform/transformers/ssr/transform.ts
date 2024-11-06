@@ -41,7 +41,7 @@ export function transform(
   }
 
   // Commit any remaining HTML to the template.
-  state.commit();
+  if (state.html.length > 0) state.commit();
 
   if (state.statics.length === 1 && state.values.length === 0) {
     return state.statics[0];

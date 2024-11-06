@@ -7,11 +7,12 @@ let a = {};
 <Foo {...a}  />
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_merge_host_attrs, $$_create_component } from "@maverick-js/ssr";
+    "import { $$_merge_host_attrs, $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
     let a = {};
     (() => {
         let $_spread_1 = a;
-        return $$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1));
+        return $$_ssr($$_template_1, [$$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1))]);
     })();
     "
   `);
@@ -19,10 +20,11 @@ let a = {};
 
 test('multiple', () => {
   expect(ssr('<Foo {...a} {...b} {...{a: 1, b: 2}} />')).toMatchInlineSnapshot(`
-    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component } from "@maverick-js/ssr";
+    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
     (() => {
         let $_spread_1 = $$_merge_props(a, b, { a: 1, b: 2 });
-        return $$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1));
+        return $$_ssr($$_template_1, [$$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1))]);
     })();
     "
   `);
@@ -34,14 +36,15 @@ test('with attributes', () => {
       '<Foo {...a} {...b} class="..." $class:foo={isFoo} $style:color={color} $var:foo={fooVar} on:click={onClick} />',
     ),
   ).toMatchInlineSnapshot(`
-    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component } from "@maverick-js/ssr";
+    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
     (() => {
         let $_spread_1 = $$_merge_props(a, b);
-        return $$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1, {
-            class: "...",
-            "$class:foo": isFoo,
-            "$var:foo": fooVar
-        }));
+        return $$_ssr($$_template_1, [$$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1, {
+                class: "...",
+                "$class:foo": isFoo,
+                "$var:foo": fooVar
+            }))]);
     })();
     "
   `);
@@ -55,13 +58,14 @@ function Bar() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component } from "@maverick-js/ssr";
+    "import { $$_merge_props, $$_merge_host_attrs, $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
     function Bar() {
         let $_spread_1 = $$_merge_props(a, b);
-        return $$_create_component(Foo, $$_merge_props($_spread_1, {
-            "foo": 10,
-            "bar": 20
-        }), null, $$_merge_host_attrs($_spread_1));
+        return $$_ssr($$_template_1, [$$_create_component(Foo, $$_merge_props($_spread_1, {
+                "foo": 10,
+                "bar": 20
+            }), null, $$_merge_host_attrs($_spread_1))]);
     }
     "
   `);
@@ -85,22 +89,22 @@ function Foo() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_merge_host_attrs, $$_create_component, $$_merge_props, $$_merge_attrs, $$_ssr } from "@maverick-js/ssr";
-    let $$_template_1 = ["<!$><div", "></div>"];
+    "import { $$_merge_host_attrs, $$_create_component, $$_ssr, $$_merge_props, $$_merge_attrs } from "@maverick-js/ssr";
+    let $$_template_1 = [""], $$_template_2 = [""], $$_template_3 = ["<!$><div", "></div>"], $$_template_4 = [""];
     function Foo() {
         class Foo {
             render() {
                 const a = {};
                 let $_spread_3 = a;
-                return $$_create_component(Host, $_spread_3, null, $$_merge_host_attrs($_spread_3));
+                return $$_ssr($$_template_1, [$$_create_component(Host, $_spread_3, null, $$_merge_host_attrs($_spread_3))]);
             }
         }
         let $_spread_1 = $$_merge_props(a, b);
-        $$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1));
-        $$_ssr($$_template_1, [$$_merge_attrs(b, c)]);
+        $$_ssr($$_template_2, [$$_create_component(Foo, $_spread_1, null, $$_merge_host_attrs($_spread_1))]);
+        $$_ssr($$_template_3, [$$_merge_attrs(b, c)]);
         const c = {};
         let $_spread_2 = $$_merge_props(c, d);
-        $$_create_component(Bar, $_spread_2, null, $$_merge_host_attrs($_spread_2));
+        $$_ssr($$_template_4, [$$_create_component(Bar, $_spread_2, null, $$_merge_host_attrs($_spread_2))]);
     }
     "
   `);

@@ -6,20 +6,16 @@ import {
   type Scope,
   tick,
 } from '@maverick-js/core';
+import { camelToKebabCase, isFunction, isUndefined, kebabToPascalCase } from '@maverick-js/std';
 import * as React from 'react';
 
-import { camelToKebabCase, kebabToPascalCase } from '../../../std/src/string';
-import { isFunction, isUndefined } from '../../../std/src/unit';
-import { ReactScopeContext, WithScope } from '../scope';
-import type { ReactBridgeProps } from '../types';
-import { setRef } from '../utils';
+import { ReactScopeContext, WithScope } from './scope';
+import type { ReactBridgeProps } from './types';
+import { setRef } from './utils';
 
 export interface CreateReactClientComponentOptions {
   props: Set<string>;
   events: Set<string>;
-  eventsRE?: RegExp;
-  domEvents?: Set<string>;
-  domEventsRE?: RegExp;
 }
 
 export function createClientComponent<T extends Component>(

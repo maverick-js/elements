@@ -26,12 +26,12 @@ export class ServerStyleDeclaration {
     return value ?? '';
   }
 
-  parse(attribute: string) {
+  parse(attribute: string, resolveName?: (name: string) => string) {
     const styles = attribute.trim().split(delimiterRE);
     for (let i = 0; i < styles.length; i++) {
       if (styles[i] === '') continue;
       const [name, value] = styles[i].split(propRE);
-      if (name && value) this.setProperty(name, value);
+      if (name && value) this.setProperty(resolveName?.(name) ?? name, value);
     }
   }
 

@@ -54,18 +54,23 @@ test('multiple static child elements', () => {
 
 test('one dynamic child element', () => {
   expect(react(`<Foo><span on:click={onClick} /></Foo>`)).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h("span", {
-                ref: $_ref_1.set
-            })
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", onClick);
+                    }
+                }
+                return $$_h("span", {
+                    ref: $_ref_1.set
+                });
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onClick);
-        }
         return $_component_1;
     })();
     "
@@ -74,24 +79,31 @@ test('one dynamic child element', () => {
 
 test('multiple dynamic child elements', () => {
   expect(react(`<Foo><span on:click={onA} /><span on:click={onB} /></Foo>`)).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { ReactFragment, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_ref_1 = $$_signal(null), $_ref_2 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h(ReactFragment, null, $$_h("span", {
-                ref: $_ref_1.set
-            }), $$_h("span", {
-                ref: $_ref_2.set
-            }))
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_ref_1 = $$_ref(), $_ref_2 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", onA);
+                    }
+                }
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_2, $_attach_2);
+                    function $_attach_2(el) {
+                        $$_listen(el, "click", onB);
+                    }
+                }
+                return $$_h(ReactFragment, null, $$_h("span", {
+                    ref: $_ref_1.set
+                }), $$_h("span", {
+                    ref: $_ref_2.set
+                }));
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onA);
-        }
-        $$_on_attach($_ref_2, $_attach_2);
-        function $_attach_2(el) {
-            $$_listen(el, "click", onB);
-        }
         return $_component_1;
     })();
     "
@@ -113,15 +125,11 @@ test('one static child expression', () => {
 
 test('one dynamic child expression', () => {
   expect(react(`<Foo>{a()}</Foo>`)).toMatchInlineSnapshot(`
-    "import { $$_computed, $$_expression, $$_component_scope, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_expression, $$_create_component } from "@maverick-js/react";
     (() => {
-        let $_computed_1 = $$_computed(a), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h($_render_1.bind($$_component_scope))
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => $$_expression(a())
         });
-        function $_render_1() {
-            let $_expression_1 = $$_expression($_computed_1);
-            return $_expression_1;
-        }
         return $_component_1;
     })();
     "
@@ -138,28 +146,28 @@ function Bar() {
       `,
     ),
   ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_IS_CLIENT, $$_create_component, $$_get_scope, $$_memo, $$_h, $$_computed, $$_expression, $$_signal, $$_on_attach, $$_component_scope } from "@maverick-js/react";
+    "import { ReactFragment, $$_IS_CLIENT, $$_create_component, $$_h, $$_expression, $$_ref, $$_on_attach } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Bar() {
-        let $_scope_1 = $$_get_scope(), $_component_factory_1 = () => $$_create_component(Bar, null, $$_IS_CLIENT && (instance => {
-            $$_listen(instance, "click", onA);
-        })), $_node_1 = $$_h($_render_1), $_computed_1 = $$_computed(() => a() ? $_node_1 : null), $_ref_1 = $$_signal(null), $_computed_2 = $$_computed(() => b() ? $$_h("span", {
-            ref: $_ref_1.set
-        }) : null), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h($_render_2.bind($$_component_scope))
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => $$_h(ReactFragment, null, $$_expression(a() ? (() => {
+                let $_component_2 = $$_create_component(Bar, null, $$_IS_CLIENT ? instance => {
+                    $$_listen(instance, "click", onA);
+                } : null);
+                return $$_h("div", null, $_component_2);
+            })() : null), $$_expression(b() ? (() => {
+                let $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", onB);
+                    }
+                }
+                return $$_h("span", {
+                    ref: $_ref_1.set
+                });
+            })() : null))
         });
-        function $_render_1() {
-            let $_component_2 = $$_memo($_scope_1, $_component_factory_1);
-            return $$_h("div", null, $_component_2);
-        }
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onB);
-        }
-        function $_render_2() {
-            let $_expression_1 = $$_expression($_computed_1), $_expression_2 = $$_expression($_computed_2);
-            return $$_h(ReactFragment, null, $_expression_1, $_expression_2);
-        }
         return $_component_1;
     }
     "
@@ -171,12 +179,15 @@ test('child component', () => {
     "import { $$_IS_CLIENT, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_component_1 = () => $$_create_component(Bar, null, $$_IS_CLIENT && (instance => {
-            $$_listen(instance, "foo", onFoo);
-        })), $_component_2 = $$_create_component(Foo, null, null, {
-            "default": $_component_1
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_component_2 = $$_create_component(Bar, null, $$_IS_CLIENT ? instance => {
+                    $$_listen(instance, "foo", onFoo);
+                } : null);
+                return $_component_2;
+            }
         });
-        return $_component_2;
+        return $_component_1;
     })();
     "
   `);

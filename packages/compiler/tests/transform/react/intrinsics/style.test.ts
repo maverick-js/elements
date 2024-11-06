@@ -47,19 +47,21 @@ function Foo() {
   return <svg style={styles} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style(styles, {})
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "style", styles);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "style", styles);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -74,20 +76,22 @@ function Foo() {
   return <svg $style={styles} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     import { $$_unwrap } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style($$_unwrap(styles), {})
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "style", styles);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "style", styles);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -102,21 +106,23 @@ function Foo() {
   return <svg style:color={color} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style("", {
                 "color": color
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "color", color);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "color", color);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -131,7 +137,7 @@ function Foo() {
   return <svg style:color={color} style:backgroundColor={bgColor} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
@@ -139,15 +145,17 @@ function Foo() {
                 "color": color,
                 "backgroundColor": bgColor
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "color", color);
-            $$_style(el, "backgroundColor", bgColor);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "color", color);
+                $$_style(el, "backgroundColor", bgColor);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -162,21 +170,23 @@ function Foo() {
   return <svg $style:color={color}/>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style("", {
                 "color": color
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "color", color);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "color", color);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -191,7 +201,7 @@ function Foo() {
   return <svg $style:color={color} $style:backgroundColor={bgColor}/>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
@@ -199,15 +209,17 @@ function Foo() {
                 "color": color,
                 "backgroundColor": bgColor
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style(el, "color", color);
-            $$_style(el, "backgroundColor", bgColor);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style(el, "color", color);
+                $$_style(el, "backgroundColor", bgColor);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -217,22 +229,24 @@ function Foo() {
 
 test('with dynamic base', () => {
   expect(react(`<svg style={styles} $style:foo={foo} />`)).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr, $$_style } from "@maverick-js/dom";
     (() => {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             style: $$_style(styles, {
                 "foo": foo
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "style", styles);
-            $$_style(el, "foo", foo);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "style", styles);
+                $$_style(el, "foo", foo);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     })();
@@ -242,7 +256,7 @@ test('with dynamic base', () => {
 
 test('with signal base', () => {
   expect(react(`<svg $style={$styles} $style:foo={foo} />`)).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style_tokens, $$_style } from "@maverick-js/dom";
     import { $$_unwrap } from "@maverick-js/ssr";
     (() => {
@@ -250,15 +264,17 @@ test('with signal base', () => {
             style: $$_style($$_unwrap($styles), {
                 "foo": foo
             })
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_style_tokens(el, $styles);
-            $$_style(el, "foo", foo);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_style_tokens(el, $styles);
+                $$_style(el, "foo", foo);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     })();

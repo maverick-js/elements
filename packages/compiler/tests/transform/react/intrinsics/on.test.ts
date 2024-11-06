@@ -8,13 +8,15 @@ function Foo() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onClick);
+        let $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_listen(el, "click", onClick);
+            }
         }
         return $$_h("div", {
             ref: $_ref_1.set
@@ -32,13 +34,15 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onClick, true);
+        let $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_listen(el, "click", onClick, true);
+            }
         }
         return $$_h("div", {
             ref: $_ref_1.set
@@ -56,14 +60,16 @@ function Foo() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Foo() {
-        let $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "pointerdown", onDown);
-            $$_listen(el, "pointerup", onUp);
+        let $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_listen(el, "pointerdown", onDown);
+                $$_listen(el, "pointerup", onUp);
+            }
         }
         return $$_h("div", {
             ref: $_ref_1.set

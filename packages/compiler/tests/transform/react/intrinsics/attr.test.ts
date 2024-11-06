@@ -60,20 +60,22 @@ function Foo() {
   return <svg width={calcWidth} autocomplete />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             "width": calcWidth
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "width", calcWidth);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "width", calcWidth);
+            }
         }
         return $$_h("svg", {
             autoComplete: true,
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -88,21 +90,23 @@ function Foo() {
   return <svg width={calcWidth} height={calcHeight} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             "width": calcWidth,
             "height": calcHeight
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "width", calcWidth);
-            $$_attr(el, "height", calcHeight);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "width", calcWidth);
+                $$_attr(el, "height", calcHeight);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -117,20 +121,22 @@ function Foo() {
   return <svg $width={width} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     import { $$_unwrap } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             "width": $$_unwrap(width)
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "width", width);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "width", width);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }
@@ -145,22 +151,24 @@ function Foo() {
   return <svg $width={width} $height={height} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_attr } from "@maverick-js/dom";
     import { $$_unwrap } from "@maverick-js/ssr";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
             "width": $$_unwrap(width),
             "height": $$_unwrap(height)
-        } : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_attr(el, "width", width);
-            $$_attr(el, "height", height);
+        } : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_attr(el, "width", width);
+                $$_attr(el, "height", height);
+            }
         }
         return $$_h("svg", {
             ...$_ssr_attrs_1,
-            suppressHydrationWarning: true,
+            [$$_suppress_hydration_warning]: true,
             ref: $_ref_1.set
         });
     }

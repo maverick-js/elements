@@ -8,8 +8,7 @@ test('no children', () => {
 test('one static child', () => {
   expect(
     <>
-      {' '}
-      <div />{' '}
+      <div />
     </>,
   ).toMatchSnapshot();
 });

@@ -4,6 +4,7 @@ import {
   $$_set_current_host_component,
   $$_set_current_slots,
   type ComponentConstructor,
+  computed,
   createComponent,
   effect,
   type FunctionComponent,
@@ -16,23 +17,56 @@ import {
   type Slot,
   type SlotRecord,
 } from '@maverick-js/core';
+import { $$_signal_name_re } from '@maverick-js/dom';
+import { $$_class as $$_ssr_class, ServerStyleDeclaration } from '@maverick-js/ssr';
+import { isFunction, kebabToCamelCase, unwrapDeep } from '@maverick-js/std';
 import { createElement } from 'react';
 
-export const $$_IS_CLIENT = typeof document !== 'undefined';
-
-export const $$_IS_SERVER = !$$_IS_CLIENT;
+import { attrsToProps } from './attrs-map';
+import { useSignal } from './hooks/use-signal';
 
 /** @internal */
-export const $$_signal = signal;
+export const $$_REACT_ELEMENT_TYPE = Symbol.for('react.element');
+
+/** @internal */
+export let $$_IS_CLIENT = false;
+
+/** @internal */
+export function $$_set_is_client(isClient: boolean) {
+  $$_IS_CLIENT = isClient;
+}
+
+/** @internal */
+export let $$_IS_SERVER = false;
+
+/** @internal */
+export function $$_set_is_server(isServer: boolean) {
+  $$_IS_SERVER = isServer;
+}
 
 /** @internal */
 export const $$_h = createElement;
+
+/** @internal */
+export const $$_suppress_hydration_warning = 'suppressHydrationWarning';
+
+const noop_ref = { set: null };
+
+/** @internal */
+export function $$_ref() {
+  if ($$_IS_SERVER) {
+    return noop_ref;
+  } else {
+    return signal(null);
+  }
+}
 
 /** @internal */
 export function $$_on_attach(
   ref: ReadSignal<HTMLElement | null>,
   callback: (el: HTMLElement) => void,
 ) {
+  if ($$_IS_SERVER) return;
   effect(() => {
     let el = ref();
     if (el) callback(el);
@@ -74,7 +108,6 @@ export function $$_create_component(
 
         component.$$.setup();
 
-        // TODO: What if render returns function? return $$_expression? (update below as well)
         return component[RENDER_SYMBOL]();
       } else {
         return Component(props ?? {});
@@ -91,20 +124,88 @@ export function $$_set_html(__html: string) {
   return { dangerouslySetInnerHTML: { __html } };
 }
 
-// expression(compute: ts.Expression, deps?: ts.Expression[]) {
-//   return this.#createCompute('expression', compute, deps);
-// }
+/** @internal */
+export function $$_expression(value: unknown) {
+  if (isFunction(value)) {
+    const $signal = computed(value as () => any);
+    return createElement(() => useSignal($signal));
+  } else {
+    return value;
+  }
+}
 
 /** @internal */
 export function $$_append_html(template: () => Node) {
+  if ($$_IS_SERVER) return null;
   return (el: Node) => {
     el.appendChild(template());
   };
 }
 
-// ~= merge_attrs (filter out namespaces and map to react props)
-// $$_spread(props: ts.Expression) {
-// }
+/** @internal */
+export function $$_ssr_spread(props: Record<string, any>) {
+  let colonIndex = -1,
+    baseClass = '',
+    baseStyle = '',
+    $class: Record<string, unknown> | null = null,
+    $style: Record<string, unknown> | null = null,
+    ssrProps: Record<string, any> = {};
 
-// $$_style(base: ts.Expression, props?: ts.PropertyAssignment[]) {
-// }
+  for (let name of Object.keys(props)) {
+    // @ts-expect-error
+    const value = unwrapDeep(props[name]);
+
+    name = name.replace($$_signal_name_re, '');
+    colonIndex = name.indexOf(':');
+
+    if (colonIndex > 0) {
+      const namespace = name.slice(0, colonIndex),
+        prop = name.slice(colonIndex + 1, name.length);
+      if (namespace === 'class') {
+        ($class ??= {})[prop] = value;
+      } else if (namespace === 'var') {
+        ($style ??= {})[`--${prop}`] = value;
+      } else if (namespace === 'style') {
+        ($style ??= {})[prop] = value;
+      }
+    } else if (name === 'class') {
+      baseClass = value;
+    } else if (name === 'style') {
+      baseStyle = value;
+    } else {
+      ssrProps[attrsToProps[name] ?? name] = value;
+    }
+  }
+
+  if ($class) {
+    ssrProps.className = $$_ssr_class(baseClass, $class);
+  } else if (baseClass) {
+    ssrProps.className = baseClass;
+  }
+
+  if (baseStyle || $style) {
+    ssrProps.style = $$_style(baseStyle, $style);
+  }
+
+  return ssrProps;
+}
+
+/** @internal */
+export function $$_style(base: string, props?: Record<string, unknown> | null) {
+  const style = new ServerStyleDeclaration();
+
+  style.parse(base, kebabToCamelCase);
+
+  if (props) {
+    for (const prop of Object.keys(props)) {
+      const value = props[prop] as any;
+      if (!value && value !== 0) {
+        style.removeProperty(prop);
+      } else {
+        style.setProperty(prop, value);
+      }
+    }
+  }
+
+  return Object.entries(style.tokens);
+}

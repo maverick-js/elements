@@ -39,7 +39,6 @@ export class SsrTransformState {
   }
 
   commit() {
-    if (this.html.length === 0 && this.values.length <= 1) return;
     this.statics.push($.string(this.html));
     this.html = '';
   }

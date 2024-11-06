@@ -25,7 +25,7 @@ export function Component(node: ComponentNode, { state, walk }: DomVisitorContex
   const props = createComponentProps(node),
     mergedSpreadPropsId = node.spreads
       ? vars.setup.create(
-          '$$_merged_props',
+          '$$_spread_props',
           runtime.mergeProps([...node.spreads.map((s) => s.initializer), props]),
         ).name
       : null,
@@ -76,14 +76,20 @@ export function createAttachHostCallback(
     block: ts.Expression[] = [];
 
   if (node.spreads || spreadId) {
-    const props = spreadId
-      ? spreadId
-      : runtime.mergeProps([
-          ...node.spreads!.map((s) => s.initializer),
-          createComponentHostProps(node),
-        ]);
+    const props: ts.Expression[] = [],
+      hostProps = createComponentHostProps(node);
 
-    block.push(runtime.hostSpread(host, props));
+    if (spreadId) {
+      props.push(spreadId);
+    } else {
+      props.push(...node.spreads!.map((s) => s.initializer));
+    }
+
+    if (hostProps) {
+      props.push(hostProps);
+    }
+
+    block.push(runtime.hostSpread(host, props.length === 1 ? props[0] : runtime.mergeProps(props)));
   } else {
     if (node.class) {
       block.push(runtime.appendClass(host, node.class.initializer));

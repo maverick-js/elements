@@ -24,7 +24,11 @@ test('attach to host', () => {
   const $foo = signal(10),
     ref = vi.fn();
 
-  class Foo extends Component<{}, {}, {}, { foo: number }> {
+  class Foo extends Component<{
+    cssProps: {
+      foo: number;
+    };
+  }> {
     static element: CustomElementOptions = {
       name: 'mk-foo',
       fallbackTag: 'div',

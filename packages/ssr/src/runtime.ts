@@ -26,7 +26,7 @@ import type { ServerElement } from './element/server-element';
 import { ServerStyleDeclaration } from './element/server-style-declaration';
 import { ServerTokenList } from './element/server-token-list';
 
-let $$_last_ssr = '';
+const SLOT_SYMBOL = Symbol('mk.slot');
 
 /** @internal */
 export function $$_ssr(template: string[], values: any[]) {
@@ -37,7 +37,7 @@ export function $$_ssr(template: string[], values: any[]) {
     result += $$_resolve_value(values[i]);
   }
 
-  return ($$_last_ssr = result);
+  return result;
 }
 
 /** @internal */
@@ -48,6 +48,8 @@ export function $$_resolve_value(value: unknown): string {
     return $$_resolve_value(value());
   } else if (isArray(value)) {
     return $$_resolve_array(value) + '<!/[]>';
+  } else if (value && typeof value === 'object' && SLOT_SYMBOL in value) {
+    return value[SLOT_SYMBOL] as string; // slot
   } else {
     return '';
   }
@@ -107,8 +109,11 @@ export function $$_style(base: unknown, props: Record<string, unknown>) {
 function $$_style_props(styles: ServerStyleDeclaration, props: Record<string, unknown>) {
   for (const prop of Object.keys(props)) {
     const value = unwrapDeep(props[prop]);
-    if (!value && value !== 0) continue;
-    styles.setProperty(prop, escapeHTML(value + ''));
+    if (!value && value !== 0) {
+      styles.removeProperty(prop);
+    } else {
+      styles.setProperty(prop, escapeHTML(value + ''));
+    }
   }
 }
 
@@ -126,6 +131,12 @@ export function $$_create_component(
   attrs: HostComponentAttrs | null = null,
 ) {
   try {
+    if (slots) {
+      for (const name of Object.keys(slots)) {
+        slots[name] = $$_create_slot.bind(slots[name]);
+      }
+    }
+
     $$_slot_stack.push($$_current_slots);
     $$_set_current_slots(slots ?? {});
 
@@ -156,6 +167,16 @@ export function $$_create_component(
   } finally {
     $$_set_current_slots($$_slot_stack.pop()!);
   }
+}
+
+/** @internal */
+export function $$_create_slot(this: Function, ...args) {
+  return { [SLOT_SYMBOL]: this(...args) };
+}
+
+/** @internal */
+export function $$_unwrap_slot(slot?: any): string | undefined {
+  return slot?.[SLOT_SYMBOL];
 }
 
 function createAttrsCallback(attrs: HostComponentAttrs) {
@@ -268,7 +289,6 @@ export function $$_merge_host_attrs(...sources: Record<string, unknown>[]) {
 
 /** @internal */
 export function $$_escape(value: any, isAttr = false) {
-  if (!isAttr && isString(value) && value === $$_last_ssr) return value;
   return escapeHTML(value, isAttr);
 }
 

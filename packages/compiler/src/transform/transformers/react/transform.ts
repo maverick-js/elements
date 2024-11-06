@@ -41,41 +41,18 @@ export function transform(
     return state.result ?? $.null;
   }
 
-  let $return: ts.Expression;
+  let result: ts.Expression;
 
   if (state.node) {
-    $return = runtime.createElement(state.node);
+    result = runtime.createElement(state.node);
   } else if (isComponentNode(node) && state.result) {
-    $return = state.result;
+    result = state.result;
   } else if (isExpressionNode(node)) {
-    $return = state.result!;
+    return state.result!;
   } else {
-    $return = state.result ? runtime.h(state.result) : $.null;
-  }
-
-  // Let expression visitor handle it from here.
-  if (state.isExpressionChild) {
-    return $return;
-  }
-
-  const render = state.renderBlock;
-
-  if (render.length > 0) {
-    render.push($.createReturnStatement($return));
-
-    const renderId = $.createUniqueName('$_render');
-    state.setup.block.push($.fn(renderId, [], render));
-
-    $return = state.isSlot
-      ? runtime.h($.bind(renderId, state.componentScope, []))
-      : state.setup.vars.create('$_node', runtime.h(renderId)).name;
-  }
-
-  // Don't build setup block for child states.
-  if (state.isChild) {
-    return $return;
+    result = state.result ? runtime.h(state.result) : $.null;
   }
 
   const setup = state.setupBlock;
-  return setup.length > 0 ? [...setup, $return] : $return;
+  return setup.length > 0 ? [...setup, result] : result;
 }

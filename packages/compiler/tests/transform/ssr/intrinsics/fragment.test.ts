@@ -45,18 +45,22 @@ test('one static child expression', () => {
 
 test('one dynamic child expression', () => {
   expect(ssr(`<>{a()}</>`)).toMatchInlineSnapshot(`
-    "import { $$_escape } from "@maverick-js/ssr";
-    $$_escape(a());
+    "import { $$_escape, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
+    $$_ssr($$_template_1, [$$_escape(a())]);
     "
   `);
 });
 
 test('multiple dynamic child expressions', () => {
-  expect(ssr(`<>{a() ? <div on:click={onA} /> : null}{b() ? <span on:click={onB} /> : null}</>`))
-    .toMatchInlineSnapshot(`
-      "[a() ? "<!$><div></div>" : null, b() ? "<!$><span></span>" : null];
-      "
-    `);
+  expect(
+    ssr(`<>{a() ? <div on:click={onA} /> : null}{b() ? <span on:click={onB} /> : null}</>`),
+  ).toMatchInlineSnapshot(`
+    "import { $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = ["", ""];
+    $$_ssr($$_template_1, [a() ? "<!$><div></div>" : null, b() ? "<!$><span></span>" : null]);
+    "
+  `);
 });
 
 test('import', () => {
@@ -72,10 +76,10 @@ import { Fragment } from "@maverick-js/core";
 `),
   ).toMatchInlineSnapshot(`
     "import { Fragment, $$_ssr, $$_create_component } from "@maverick-js/ssr";
-    let $$_template_1 = ["<div></div><span></span>"];
-    $$_create_component(Fragment, null, {
-        "default": () => $$_ssr($$_template_1, [() => "<div></div>"])
-    });
+    let $$_template_1 = [""], $$_template_2 = ["<div></div><span></span>"];
+    $$_ssr($$_template_1, [$$_create_component(Fragment, null, {
+            "default": () => $$_ssr($$_template_2, [() => "<div></div>"])
+        })]);
     "
   `);
 });

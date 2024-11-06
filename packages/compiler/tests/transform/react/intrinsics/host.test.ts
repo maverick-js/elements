@@ -17,9 +17,9 @@ import { Host } from '@maverick-js/core';
         let $_component_1 = $$_create_component(Host, {
             "autofocus": true,
             "$title": title
-        }, $$_IS_CLIENT && (instance => {
+        }, $$_IS_CLIENT ? instance => {
             $$_listen(instance, "click", onClick);
-        }), {
+        } : null, {
             "default": () => $_static_node_1
         }, host => {
             $$_class(host, "foo", true);

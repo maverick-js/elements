@@ -386,10 +386,14 @@ export namespace JSX {
     ClassAttributes &
     SignalClassAttributes &
     SignalCSSVarAttributes<ResolveMetaCssProps<Meta>> &
-    OnAttributes<EventTarget, ResolveMetaEvents<Meta>> & {
+    OnAttributes<EventTarget, ResolveMetaEvents<Meta>> &
+    ClassComponentChildren<Meta> & {
       class?: string;
-      children?: JSX.Element;
     };
+
+  export type ClassComponentChildren<Meta extends ComponentMeta> = Meta['slots'] extends {}
+    ? { children?: JSX.Element }
+    : {};
 
   export interface HTMLMarqueeElement extends HTMLElement, HTMLMarqueeElementProperties {}
 

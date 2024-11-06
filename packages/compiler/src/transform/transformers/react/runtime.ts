@@ -1,5 +1,5 @@
 import { filterFalsy, isArray, isString, trimQuotes } from '@maverick-js/std';
-import { $, createNullFilledArgs, isAccessExpression } from '@maverick-js/ts';
+import { $, createNullFilledArgs } from '@maverick-js/ts';
 import ts from 'typescript';
 
 import {
@@ -21,6 +21,10 @@ export class ReactRuntime extends Runtime {
 
   get isServer() {
     return this.id('$$_IS_SERVER');
+  }
+
+  get suppressHydrationWarning() {
+    return this.id('$$_suppress_hydration_warning');
   }
 
   createElement(node: ReactNode) {
@@ -89,7 +93,7 @@ export class ReactRuntime extends Runtime {
       createNullFilledArgs([
         $.id(tagName),
         props,
-        listeners ? this.ifClient(listeners) : undefined,
+        listeners ? this.ifClient(listeners, $.null) : undefined,
         slots,
         onAttach,
       ]),
@@ -104,12 +108,16 @@ export class ReactRuntime extends Runtime {
     return this.#createConditionalExpression(this.isServer, expression, falsy);
   }
 
+  ref() {
+    return this.call('ref', []);
+  }
+
   setHtml(content: ts.Expression) {
     return this.call('set_html', [content]);
   }
 
-  expression(compute: ts.Expression, deps?: ts.Expression[]) {
-    return this.#createCompute('expression', null, compute, deps);
+  expression(compute: ts.Expression) {
+    return this.call('expression', [compute]);
   }
 
   appendHtml(html: ts.Expression) {
@@ -120,31 +128,12 @@ export class ReactRuntime extends Runtime {
     return this.call('style', [base, $.object(props, true)]);
   }
 
-  spread(props: ts.Expression) {
-    return this.call('spread', [props]);
+  ssrSpread(props: ts.Expression) {
+    return this.call('ssr_spread', [props]);
   }
 
   onAttach(ref: ts.Identifier, callback: ts.Expression) {
     return this.call('on_attach', [ref, callback]);
-  }
-
-  #createCompute(
-    id: string,
-    scope: ts.Expression | null,
-    compute: ts.Expression | ts.Block,
-    deps?: ts.Expression[],
-  ) {
-    const callback = this.#createComputeCallback(compute),
-      args = deps?.length ? [callback, $.array(deps)] : [callback];
-    return this.call(id, scope ? [scope, ...args] : args);
-  }
-
-  #createComputeCallback(compute: ts.Expression | ts.Block) {
-    if (isAccessExpression(compute)) {
-      return compute;
-    } else {
-      return $.arrowFn([], compute);
-    }
   }
 
   #createConditionalExpression(

@@ -55,3 +55,7 @@ function serverEffect(effect: Effect, options?: { id?: string }): StopEffect {
 
   return noop;
 }
+
+export function staticSignal<T>(this: T) {
+  return this;
+}

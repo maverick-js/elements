@@ -493,7 +493,7 @@ export function createIfStatement(
   block: Array<ts.Expression | ts.Statement>,
   elseBlock?: ts.Statement | Array<ts.Expression | ts.Statement>,
 ) {
-  $.createIfStatement(
+  return $.createIfStatement(
     condition,
     $.block(block),
     !isArray(elseBlock) ? elseBlock : $.block(elseBlock),
@@ -566,4 +566,17 @@ export function updateBlock(block: ts.Block | ts.ModuleBlock, updates: BlockUpda
   }
 
   return block;
+}
+
+export function getSelfInvokedFn(node: ts.Node): ts.ArrowFunction | null {
+  if (
+    ts.isCallExpression(node) &&
+    ts.isParenthesizedExpression(node.expression) &&
+    ts.isArrowFunction(node.expression.expression) &&
+    node.expression.expression.parameters.length === 0
+  ) {
+    return node.expression.expression;
+  }
+
+  return null;
 }

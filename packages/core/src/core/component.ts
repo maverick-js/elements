@@ -67,17 +67,19 @@ export type InferComponent<T> = T extends ComponentConstructor<infer Component> 
 
 export interface AnyComponentMeta extends ComponentMeta<any, any, any, any> {}
 
-export interface ComponentMeta<Props = {}, State = {}, Events = {}, CssProps = {}> {
+export interface ComponentMeta<Props = {}, State = {}, Events = {}, CssProps = {}, Slots = {}> {
   props?: Props;
   state?: State;
   events?: Events;
   cssProps?: CssProps;
+  slots?: Slots;
 }
 
 export type ResolveMetaProps<T extends ComponentMeta> = NonNullable<T['props']>;
 export type ResolveMetaState<T extends ComponentMeta> = NonNullable<T['state']>;
 export type ResolveMetaEvents<T extends ComponentMeta> = NonNullable<T['events']>;
 export type ResolveMetaCssProps<T extends ComponentMeta> = NonNullable<T['cssProps']>;
+export type ResolveMetaSlots<T extends ComponentMeta> = NonNullable<T['slots']>;
 
 export type InferComponentMeta<T> = T extends Component<infer Meta> ? Meta : never;
 export type InferComponentProps<T> = ResolveMetaProps<InferComponentMeta<T>>;
@@ -85,6 +87,7 @@ export type InferComponentState<T> = ResolveMetaState<InferComponentMeta<T>>;
 export type InferComponentEvents<T> = ResolveMetaEvents<InferComponentMeta<T>> &
   ComponentLifecycleEvents;
 export type InferComponentCssProps<T> = ResolveMetaCssProps<InferComponentMeta<T>>;
+export type InferComponentSlots<T> = ResolveMetaSlots<InferComponentMeta<T>>;
 
 export type InferComponentMembers<T> = Omit<InferComponentProps<T>, keyof T> &
   Omit<T, keyof Component>;

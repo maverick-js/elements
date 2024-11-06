@@ -263,7 +263,7 @@ test('render function with multiple expressions', () => {
         });
         return $_component_1;
     }
-    $$_render_2({ $1: Foo, $5: ({ a, b, $c }) => ($$_render_1({ $2: a, $3: b, $4: $c })) });
+    $$_render_2({ $1: Foo, $5: ({ a, b, $c }) => $$_render_1({ $2: a, $3: b, $4: $c }) });
     "
   `);
 });

@@ -43,18 +43,23 @@ test('single static element in named slot', () => {
 
 test('single dynamic element in default slot', () => {
   expect(react('<Foo><div on:click /></Foo>')).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h("div", {
-                ref: $_ref_1.set
-            })
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", true);
+                    }
+                }
+                return $$_h("div", {
+                    ref: $_ref_1.set
+                });
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", true);
-        }
         return $_component_1;
     })();
     "
@@ -63,18 +68,23 @@ test('single dynamic element in default slot', () => {
 
 test('single dynamic element in named slot', () => {
   expect(react('<Foo><div on:click slot="foo" /></Foo>')).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     (() => {
-        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
-            "foo": () => $$_h("div", {
-                ref: $_ref_1.set
-            })
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "foo": () => {
+                let $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", true);
+                    }
+                }
+                return $$_h("div", {
+                    ref: $_ref_1.set
+                });
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", true);
-        }
         return $_component_1;
     })();
     "
@@ -162,34 +172,35 @@ test('fragment default slot', () => {
     "import { ReactFragment, $$_h, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("div");
     (() => {
-        let $_component_1 = () => $$_create_component(Fragment, null, null, {
-            "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
-        }), $_component_2 = $$_create_component(Foo, null, null, {
-            "default": $_component_1
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_component_2 = $$_create_component(Fragment, null, null, {
+                    "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2)
+                });
+                return $_component_2;
+            }
         });
-        return $_component_2;
+        return $_component_1;
     })();
     "
   `);
 });
 
 test('fragment named slot', () => {
-  expect(
-    react(`<Foo><Fragment slot="foo"><div /><div /><div>{a}</div></Fragment></Foo>`),
-  ).toMatchInlineSnapshot(`
-    "import { ReactFragment, $$_h, $$_computed, $$_expression, $$_component_scope, $$_create_component } from "@maverick-js/react";
+  expect(react(`<Foo><Fragment slot="foo"><div /><div /><div>{a}</div></Fragment></Foo>`))
+    .toMatchInlineSnapshot(`
+    "import { ReactFragment, $$_h, $$_expression, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("div"), $_static_node_2 = /* @__PURE__ */ $$_h("div");
     (() => {
-        let $_computed_1 = $$_computed(a), $_component_1 = () => $$_create_component(Fragment, null, null, {
-            "default": () => $$_h($_render_1.bind($$_component_scope))
-        }), $_component_2 = $$_create_component(Foo, null, null, {
-            "foo": $_component_1
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "foo": () => {
+                let $_component_2 = $$_create_component(Fragment, null, null, {
+                    "default": () => $$_h(ReactFragment, null, $_static_node_1, $_static_node_2, $$_h("div", null, $$_expression(a)))
+                });
+                return $_component_2;
+            }
         });
-        function $_render_1() {
-            let $_expression_1 = $$_expression($_computed_1);
-            return $$_h(ReactFragment, null, $_static_node_1, $_static_node_2, $$_h("div", null, $_expression_1));
-        }
-        return $_component_2;
+        return $_component_1;
     })();
     "
   `);
@@ -197,15 +208,11 @@ test('fragment named slot', () => {
 
 test('render function', () => {
   expect(react(`<Foo>{(props) => <div>{props.foo}</div>}</Foo>`)).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     (() => {
         let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": (props) => $$_h($_render_1.bind($$_component_scope, props))
+            "default": (props) => $$_h("div", null, $$_expression(props.foo))
         });
-        function $_render_1(props) {
-            let $_node_1 = $$_expression(props.foo);
-            return $$_h("div", null, $_node_1);
-        }
         return $_component_1;
     })();
     "
@@ -224,21 +231,16 @@ test('render function with nested component', () => {
   )}
 </Foo>`),
   ).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component_scope, $$_create_component, $$_memo } from "@maverick-js/react";
+    "import { $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     (() => {
         let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": ({ foo, bar }) => ($$_h($_render_2.bind($$_component_scope, foo, bar)))
+            "default": ({ foo, bar }) => {
+                let $_component_2 = $$_create_component(Bar, null, null, {
+                    "default": (bux) => $$_h("span", null, $$_expression(bux.a), $$_expression(bar))
+                });
+                return $$_h("div", null, $$_expression(foo), $_component_2);
+            }
         });
-        function $_render_1(bux, bar) {
-            let $_node_1 = $$_expression(bux.a), $_node_2 = $$_expression(bar);
-            return $$_h("span", null, $_node_1, $_node_2);
-        }
-        function $_render_2(foo, bar) {
-            let $_node_3 = $$_expression(foo), $_component_2 = $$_memo(this, () => $$_create_component(Bar, null, null, {
-                "default": (bux) => $$_h($_render_1.bind($$_component_scope, bux, bar))
-            }));
-            return $$_h("div", null, $_node_3, $_component_2);
-        }
         return $_component_1;
     })();
     "
@@ -247,15 +249,11 @@ test('render function with nested component', () => {
 
 test('render function with binary expression', () => {
   expect(react(`<Foo>{(props) => <div>{props.foo + 10}</div>}</Foo>`)).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     (() => {
         let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": (props) => $$_h($_render_1.bind($$_component_scope, props))
+            "default": (props) => $$_h("div", null, $$_expression(props.foo + 10))
         });
-        function $_render_1(props) {
-            let $_node_1 = $$_expression(() => props.foo + 10, [props.foo]);
-            return $$_h("div", null, $_node_1);
-        }
         return $_component_1;
     })();
     "
@@ -282,35 +280,25 @@ test('render function with many args and nested components', () => {
 </Foo>`,
     ),
   ).toMatchInlineSnapshot(`
-    "import { $$_expression, ReactFragment, $$_h, $$_component_scope, $$_create_component, $$_memo } from "@maverick-js/react";
+    "import { $$_expression, ReactFragment, $$_h, $$_create_component } from "@maverick-js/react";
     (() => {
         let $_component_1 = $$_create_component(Foo, null, null, {
             "default": (a, b, { c }, [d], e, f, g) => {
-                return ($$_h($_render_4.bind($$_component_scope, a, b, c, d, e, f, g)));
+                return (() => {
+                    let $_component_2 = $$_create_component(Bar, null, null, {
+                        "default": () => {
+                            let $_component_3 = $$_create_component(Bux, null, null, {
+                                "default": () => $$_h(ReactFragment, null, $$_expression(a.a), $$_expression(g), $$_expression(g))
+                            }), $_component_4 = $$_create_component(Hux, null, null, {
+                                "default": (h) => $$_h("div", null, $$_expression(a + 10), $$_expression(a), $$_expression(e.a), $$_expression(e.b()), $$_expression(call(h)), $$_expression(i))
+                            });
+                            return $$_h(ReactFragment, null, $$_expression(e.a), $$_h("span", null, $$_expression(f.a), $$_expression(f.b)), $_component_3, $_component_4);
+                        }
+                    });
+                    return $$_h("div", null, $$_expression(a), $$_expression(b), $$_expression(c), $$_expression(d), $_component_2);
+                })();
             }
         });
-        function $_render_1(a, g) {
-            let $_node_1 = $$_expression(a.a), $_node_2 = $$_expression(g), $_node_3 = $$_expression(g);
-            return $$_h(ReactFragment, null, $_node_1, $_node_2, $_node_3);
-        }
-        function $_render_2(a, e, h) {
-            let $_node_4 = $$_expression(() => a + 10, [a]), $_node_5 = $$_expression(a), $_node_6 = $$_expression(e.a), $_node_7 = $$_expression(() => e.b(), [e.b]), $_node_8 = $$_expression(() => call(h), [call, h]), $_node_9 = $$_expression(i);
-            return $$_h("div", null, $_node_4, $_node_5, $_node_6, $_node_7, $_node_8, $_node_9);
-        }
-        function $_render_3(e, f, a, g) {
-            let $_node_10 = $$_expression(e.a), $_node_11 = $$_expression(f.a), $_node_12 = $$_expression(f.b), $_component_2 = $$_memo(this, () => $$_create_component(Bux, null, null, {
-                "default": () => $$_h($_render_1.bind($$_component_scope, a, g))
-            })), $_component_3 = $$_memo(this, () => $$_create_component(Hux, null, null, {
-                "default": (h) => $$_h($_render_2.bind($$_component_scope, a, e, h))
-            }));
-            return $$_h(ReactFragment, null, $_node_10, $$_h("span", null, $_node_11, $_node_12), $_component_2, $_component_3);
-        }
-        function $_render_4(a, b, c, d, e, f, g) {
-            let $_node_13 = $$_expression(a), $_node_14 = $$_expression(b), $_node_15 = $$_expression(c), $_node_16 = $$_expression(d), $_component_4 = $$_memo(this, () => $$_create_component(Bar, null, null, {
-                "default": () => $$_h($_render_3.bind($$_component_scope, e, f, a, g))
-            }));
-            return $$_h("div", null, $_node_13, $_node_14, $_node_15, $_node_16, $_component_4);
-        }
         return $_component_1;
     })();
     "
@@ -325,16 +313,12 @@ function Bar() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     let $_static_node_1 = /* @__PURE__ */ $$_h("span", null, "Static");
     function Bar() {
         let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": (a, b) => $$_h($_render_1.bind($$_component_scope, a, b))
+            "default": (a, b) => $$_h("div", null, $$_h("span", null, $$_expression(a)), $$_h("span", null, $$_expression(b)), $_static_node_1)
         });
-        function $_render_1(a, b) {
-            let $_node_1 = $$_expression(a), $_node_2 = $$_expression(b);
-            return $$_h("div", null, $$_h("span", null, $_node_1), $$_h("span", null, $_node_2), $_static_node_1);
-        }
         return $_component_1;
     }
     "
@@ -349,18 +333,23 @@ function Bar() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_signal, $$_on_attach, $$_h, $$_create_component } from "@maverick-js/react";
+    "import { $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_listen } from "@maverick-js/dom";
     function Bar() {
-        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Foo, null, null, {
-            "default": () => $$_h("div", {
-                ref: $_ref_1.set
-            }, "Text")
+        let $_component_1 = $$_create_component(Foo, null, null, {
+            "default": () => {
+                let $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_listen(el, "click", onClick);
+                    }
+                }
+                return $$_h("div", {
+                    ref: $_ref_1.set
+                }, "Text");
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_listen(el, "click", onClick);
-        }
         return $_component_1;
     }
     "
@@ -379,15 +368,11 @@ test('render function with multiple expressions', () => {
       </Foo>
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_expression, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     (() => {
         let $_component_1 = $$_create_component(Foo, null, null, {
-            "default": ({ a, b, $c }) => ($$_h($_render_1.bind($$_component_scope, a, b, $c)))
+            "default": ({ a, b, $c }) => $$_h("span", null, $$_expression(a), " - ", $$_expression(b), " - ", $$_expression($c))
         });
-        function $_render_1(a, b, $c) {
-            let $_node_1 = $$_expression(a), $_node_2 = $$_expression(b), $_node_3 = $$_expression($c);
-            return $$_h("span", null, $_node_1, " - ", $_node_2, " - ", $_node_3);
-        }
         return $_component_1;
     })();
     "

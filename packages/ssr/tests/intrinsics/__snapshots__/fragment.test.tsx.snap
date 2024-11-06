@@ -12,6 +12,6 @@ exports[`one dynamic child element 1`] = `"<!$><div></div><!$><div></div>"`;
 
 exports[`one dynamic child text expression 1`] = `"foo"`;
 
-exports[`one static child 1`] = `" <div></div> "`;
+exports[`one static child 1`] = `"<div></div>"`;
 
 exports[`one static child expression 1`] = `"foo"`;

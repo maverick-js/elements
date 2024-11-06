@@ -68,13 +68,6 @@ export function createComponentSlotsObject<State>(
         state = nextState(slot),
         result = transform(slot, state) ?? $.null;
 
-      if (isArray(result)) {
-        const lastNode = result.at(-1);
-        if (lastNode && ts.isExpression(lastNode)) {
-          result[result.length - 1] = $.createReturnStatement(lastNode);
-        }
-      }
-
       if (resolve) {
         result = resolve(slot, state, result, (node) => resolveSlot(slot, node));
       } else {
@@ -88,10 +81,18 @@ export function createComponentSlotsObject<State>(
 }
 
 function resolveSlot(slot: AstNode, result: StateTransformResult = $.null) {
-  return !isArray(result) &&
-    (ts.isArrowFunction(result) || (isExpressionNode(slot) && ts.isArrowFunction(slot.expression)))
-    ? result
-    : $.arrowFn([], result);
+  const renderFunction =
+      isExpressionNode(slot) && ts.isArrowFunction(slot.expression) ? slot.expression : null,
+    params = renderFunction?.parameters ?? [];
+
+  if (isArray(result)) {
+    returnLastExpression(result);
+    return $.arrowFn(params, result);
+  } else if (ts.isArrowFunction(result) || renderFunction) {
+    return result;
+  } else {
+    return $.arrowFn(params, result);
+  }
 }
 
 export function isHigherOrderExpression(node: AstNode) {
@@ -155,16 +156,34 @@ export function transformAstNodeChildren<Node extends AstNode, State>(
   transform: StateTransform<State>,
   nextState: NextState<State>,
 ): InferTsNode<Node> {
-  const map: TsNodeMap = new Map();
+  const map: TsNodeMap = new Map(),
+    root = isExpressionNode(node) ? node.expression : node.node;
 
   if ('children' in node && node.children) {
     for (const child of node.children) {
-      map.set(child.node, transform(child, nextState(child)));
+      let replacedNode = ts.isParenthesizedExpression(child.node.parent)
+          ? child.node.parent
+          : child.node,
+        result = transform(child, nextState(child));
+
+      if (isArray(result)) {
+        returnLastExpression(result);
+        result =
+          ts.isArrowFunction(root) && root.body === replacedNode
+            ? ($.block(result) as any)
+            : $.selfInvokedFn(result);
+      }
+
+      map.set(replacedNode, result);
     }
   }
 
-  return replaceTsNodes(
-    isExpressionNode(node) ? node.expression : node.node,
-    map,
-  ) as InferTsNode<Node>;
+  return replaceTsNodes(root, map) as InferTsNode<Node>;
+}
+
+export function returnLastExpression(nodes: Array<ts.Expression | ts.Statement>) {
+  const lastNode = nodes.at(-1);
+  if (lastNode && ts.isExpression(lastNode)) {
+    nodes[nodes.length - 1] = $.createReturnStatement(lastNode);
+  }
 }

@@ -4,17 +4,17 @@ import {
   type InferComponentEvents,
   type InferComponentProps,
 } from '@maverick-js/core';
-import type { InferEventDetail } from '@maverick-js/std';
+import type { InferEventDetail, Optional } from '@maverick-js/std';
 import type * as React from 'react';
 import type { PascalCase } from 'type-fest';
 
-export interface ReactComponent<T extends Component> {
-  (props: ReactProps<T>): React.ReactNode;
+export interface ReactComponent<C extends Component> {
+  (props: ReactProps<C>): React.ReactNode;
 }
 
-export interface ReactComponentBridge<T extends Component> {
+export interface ReactComponentBridge<C extends Component> {
   displayName?: string;
-  (props: ReactBridgeProps<T>): React.ReactNode;
+  (props: ReactBridgeProps<C>): React.ReactNode;
 }
 
 export type ReactProps<
@@ -28,11 +28,6 @@ export type ReactProps<
       | undefined;
     part?: string | undefined;
   };
-
-// https://github.com/vidstack/player/issues/1297
-type Optional<T> = {
-  [P in keyof T]?: T[P] | undefined;
-};
 
 export type ReactBridgeProps<C extends Component> = ReactProps<C> & {
   className?: string;

@@ -1,3 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`children 1`] = `"<div><span>Default Slot</span><div>Bar Component</div><span>Foo Slot</span></div>"`;
+
 exports[`host vars 1`] = `"<!$><div data-maverick="" class="foo ... bar"></div>"`;

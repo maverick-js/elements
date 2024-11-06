@@ -18,6 +18,7 @@ import {
 } from '../../../parse/analysis';
 import { parse } from '../../../parse/parse';
 import { setupCustomElements } from '../shared/element';
+import { returnLastExpression } from '../shared/factory';
 import type { Transform, TransformData } from '../transformer';
 import { SsrTransformState } from './state';
 import { transform } from './transform';
@@ -87,12 +88,7 @@ export function ssrTransform(
       }
 
       if (isArray(result)) {
-        const render = result.at(-1)!;
-
-        if (ts.isExpression(render)) {
-          result[result.length - 1] = $.createReturnStatement(render);
-        }
-
+        returnLastExpression(result);
         return $.selfInvokedFn(result);
       }
 

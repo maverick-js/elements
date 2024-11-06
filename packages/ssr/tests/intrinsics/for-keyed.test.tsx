@@ -4,7 +4,7 @@ it('should render keyed loop', () => {
   const $each = signal([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
 
   expect(
-    <ForKeyed each={$each}>
+    <ForKeyed each={$each} key={(_, i) => i}>
       {(item, i) => (
         <span>
           {item.id} - {i()}

@@ -1,9 +1,13 @@
 import {
   Component,
+  createSlot,
   type CustomElementOptions,
+  Fragment,
+  getSlots,
   Host,
   type JSX,
   signal,
+  type Slot,
   tick,
 } from '@maverick-js/core';
 import { render } from '@maverick-js/dom';
@@ -37,4 +41,41 @@ test('host vars', () => {
   tick();
 
   expect(target).toMatchSnapshot();
+});
+
+test('children', () => {
+  interface Slots {
+    default: Slot;
+    foo: Slot;
+  }
+
+  class Foo extends Component<{
+    slots: Slots;
+  }> {
+    static Slot = createSlot<Slots>();
+
+    override render(): JSX.Element {
+      const slots = getSlots<Slots>();
+      return (
+        <div>
+          {slots.default()}
+          {slots.foo()}
+        </div>
+      );
+    }
+  }
+
+  function Bar() {
+    return <div>Bar Component</div>;
+  }
+
+  expect(
+    <Foo>
+      <span>Default Slot</span>
+      <Fragment slot="foo">
+        <Bar />
+        <span>Foo Slot</span>
+      </Fragment>
+    </Foo>,
+  ).toMatchSnapshot();
 });

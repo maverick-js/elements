@@ -8,15 +8,18 @@ function Foo() {
 }
     `),
   ).toMatchInlineSnapshot(`
-    "import { $$_spread, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_spread, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_spread } from "@maverick-js/dom";
     function Foo() {
-        let $_spread_props_1 = a, $_ssr_props_1 = $$_IS_SERVER ? $$_spread($_spread_props_1) : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_spread(el, $_spread_props_1);
+        let $_spread_props_1 = a, $_ssr_props_1 = $$_IS_SERVER ? $$_ssr_spread($_spread_props_1) : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_spread(el, $_spread_props_1);
+            }
         }
         return $$_h("div", {
+            [$$_suppress_hydration_warning]: true,
             ...$_ssr_props_1,
             ref: $_ref_1.set
         });
@@ -33,15 +36,18 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_spread, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_spread, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_merge_props, $$_spread } from "@maverick-js/dom";
     function Foo() {
-        let $_spread_props_1 = $$_merge_props(a, b, { a: 1, b: 2 }), $_ssr_props_1 = $$_IS_SERVER ? $$_spread($_spread_props_1) : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_spread(el, $_spread_props_1);
+        let $_spread_props_1 = $$_merge_props(a, b, { a: 1, b: 2 }), $_ssr_props_1 = $$_IS_SERVER ? $$_ssr_spread($_spread_props_1) : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_spread(el, $_spread_props_1);
+            }
         }
         return $$_h("div", {
+            [$$_suppress_hydration_warning]: true,
             ...$_ssr_props_1,
             ref: $_ref_1.set
         });
@@ -58,7 +64,7 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_spread, $$_IS_SERVER, $$_signal, $$_on_attach, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_spread, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_merge_props, $$_spread } from "@maverick-js/dom";
     function Foo() {
         let $_spread_props_1 = $$_merge_props(a, b, {
@@ -68,12 +74,15 @@ function Foo() {
             "$prop:foo": fooProp,
             "on:click": onClick,
             ref: onRef
-        }), $_ssr_props_1 = $$_IS_SERVER ? $$_spread($_spread_props_1) : null, $_ref_1 = $$_signal(null);
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_spread(el, $_spread_props_1);
+        }), $_ssr_props_1 = $$_IS_SERVER ? $$_ssr_spread($_spread_props_1) : null, $_ref_1 = $$_ref();
+        if ($$_IS_CLIENT) {
+            $$_on_attach($_ref_1, $_attach_1);
+            function $_attach_1(el) {
+                $$_spread(el, $_spread_props_1);
+            }
         }
         return $$_h("div", {
+            [$$_suppress_hydration_warning]: true,
             ...$_ssr_props_1,
             ref: $_ref_1.set
         });
@@ -90,23 +99,25 @@ function Foo() {
 }
 `),
   ).toMatchInlineSnapshot(`
-    "import { $$_memo, $$_spread, $$_IS_SERVER, $$_signal, $$_on_attach, $$_expression, $$_h, $$_component_scope, $$_create_component } from "@maverick-js/react";
+    "import { $$_ssr_spread, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_expression, $$_h, $$_create_component } from "@maverick-js/react";
     import { $$_merge_props, $$_spread } from "@maverick-js/dom";
     function Foo() {
-        let $_ref_1 = $$_signal(null), $_component_1 = $$_create_component(Bar, null, null, {
-            "default": (props) => $$_h($_render_1.bind($$_component_scope, props))
+        let $_component_1 = $$_create_component(Bar, null, null, {
+            "default": (props) => {
+                let $_spread_props_1 = $$_merge_props(a, b), $_ssr_props_1 = $$_IS_SERVER ? $$_ssr_spread($_spread_props_1) : null, $_ref_1 = $$_ref();
+                if ($$_IS_CLIENT) {
+                    $$_on_attach($_ref_1, $_attach_1);
+                    function $_attach_1(el) {
+                        $$_spread(el, $_spread_props_1);
+                    }
+                }
+                return $$_h("div", {
+                    [$$_suppress_hydration_warning]: true,
+                    ...$_ssr_props_1,
+                    ref: $_ref_1.set
+                }, $$_expression(props.foo));
+            }
         });
-        $$_on_attach($_ref_1, $_attach_1);
-        function $_attach_1(el) {
-            $$_spread(el, $_spread_props_1);
-        }
-        function $_render_1(props) {
-            let $_spread_props_1 = $$_memo(this, () => $$_merge_props(a, b), [a, b]), $_ssr_props_1 = $$_IS_SERVER ? $$_memo(this, () => $$_spread($_spread_props_1), [$_spread_props_1]) : null, $_node_1 = $$_expression(props.foo);
-            return $$_h("div", {
-                ...$_ssr_props_1,
-                ref: $_ref_1.set
-            }, $_node_1);
-        }
         return $_component_1;
     }
     "

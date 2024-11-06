@@ -10,21 +10,22 @@ import { Host } from '@maverick-js/core';
 </Host>
     `),
   ).toMatchInlineSnapshot(`
-    "import { Host, $$_unwrap, $$_create_component } from "@maverick-js/ssr";
-    $$_create_component(Host, {
-        "autofocus": true,
-        "$title": title
-    }, {
-        "default": () => "<div>...</div>"
-    }, {
-        class: $$_unwrap($class),
-        $class: {
-            "foo": true
-        },
-        $var: {
-            "--foo": 10
-        }
-    });
+    "import { Host, $$_unwrap, $$_create_component, $$_ssr } from "@maverick-js/ssr";
+    let $$_template_1 = [""];
+    $$_ssr($$_template_1, [$$_create_component(Host, {
+            "autofocus": true,
+            "$title": title
+        }, {
+            "default": () => "<div>...</div>"
+        }, {
+            class: $$_unwrap($class),
+            $class: {
+                "foo": true
+            },
+            $var: {
+                "--foo": 10
+            }
+        })]);
     "
   `);
 });

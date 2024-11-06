@@ -1,18 +1,13 @@
-import { isArray } from '@maverick-js/std';
 import { $ } from '@maverick-js/ts';
-import ts from 'typescript';
 
-import { type ComponentNode, isComponentNode, isExpressionNode } from '../../../../parse/ast';
+import { type ComponentNode } from '../../../../parse/ast';
 import { createAttachHostCallback } from '../../dom/nodes/component';
 import { createComponentProps, createComponentSlotsObject } from '../../shared/factory';
 import type { ReactTransformState, ReactVisitorContext } from '../state';
 import { transform } from '../transform';
-import { resolveExpressionChild } from './expression';
 
 export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
-  const { runtime, domRuntime } = state,
-    // Avoid creating a render function wrapper if not needed.
-    mode = state.isExpressionChild ? 'render' : 'setup';
+  const { runtime, domRuntime } = state;
 
   const parent = state.node;
   state.node = null; // temp remove so slots create new roots.
@@ -22,48 +17,12 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
   const props = !node.spreads
       ? $props
       : domRuntime.mergeProps([...node.spreads.map((s) => s.initializer), $props]),
-    propsId = node.spreads
-      ? state[mode].vars.create(
-          '$_spread_props',
-          mode === 'render' && props ? runtime.memo(state.currentScope, props) : props,
-        ).name
-      : undefined,
+    propsId = node.spreads ? state.setup.vars.create('$_spread_props', props).name : undefined,
     listeners = !propsId
       ? createListenersCallback(node, state)
       : domRuntime.listenCallback(propsId),
-    listenerId = propsId
-      ? state[mode].vars.create(
-          '$_listeners',
-          mode === 'render' && listeners ? runtime.memo(state.currentScope, listeners) : listeners,
-        ).name
-      : undefined,
-    slots = createComponentSlotsObject(
-      node,
-      transform,
-      (node) => {
-        const childState = state.child(node);
-        childState.isSlot = true;
-        return childState;
-      },
-      (slot, childState, result, resolve) => {
-        if (isComponentNode(slot) && !isArray(result) && ts.isIdentifier(result)) {
-          return result;
-        }
-
-        if (isExpressionNode(slot) && ts.isArrowFunction(slot.expression)) {
-          // Pass render function identifiers directly to slot.
-          if (!isArray(result)) {
-            return result;
-          }
-        }
-
-        if (childState.isExpressionChild) {
-          return resolve(resolveExpressionChild(result, state, childState));
-        }
-
-        return resolve(result);
-      },
-    ),
+    listenerId = propsId ? state.setup.vars.create('$_listeners', listeners).name : undefined,
+    slots = createComponentSlotsObject(node, transform, (child) => state.child(child)),
     onAttach = createAttachHostCallback(node, domRuntime, propsId);
 
   const component = runtime.createComponent(
@@ -73,19 +32,7 @@ export function Component(node: ComponentNode, { state }: ReactVisitorContext) {
       slots,
       onAttach,
     ),
-    componentId = state[mode].vars.create(
-      '$_component',
-      mode === 'render'
-        ? runtime.memo(
-            state.currentScope,
-            !state.render.allArgs.size && !node.spreads
-              ? state.setup.vars.create('$_component_factory', $.arrowFn([], component)).name
-              : component,
-          )
-        : state.isSlot
-          ? $.arrowFn([], component)
-          : component,
-    ).name;
+    componentId = state.setup.vars.create('$_component', component).name;
 
   state.result = componentId;
   parent?.children.push(componentId);
