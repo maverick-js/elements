@@ -2,18 +2,18 @@ import {
   $$_current_host_component,
   type AnyComponent,
   type ComponentConstructor,
-  DEFINE_ELEMENT_SYMBOL,
   getSlots,
   type HostProps,
-  type MaverickCustomElement,
 } from '@maverick-js/core';
-import { attachDeclarativeShadowDOM, attachShadow } from '@maverick-js/std';
+import { $$_attr, $$_signal_name_re } from '@maverick-js/dom';
+import { ServerElement } from '@maverick-js/ssr';
+import { isString, kebabToCamelCase, setAttribute, unwrapDeep } from '@maverick-js/std';
+import { createElement, type ReactNode } from 'react';
 
-import { insert } from '../insert';
-import { hydrate, hydration } from '../render';
-import { $$_attr, $$_next_element, $$_signal_name_re } from '../runtime';
+import { attrsToProps } from '../attrs-map';
+import { $$_IS_SERVER, $$_on_attach, $$_ref, $$_suppress_hydration_warning } from '../runtime';
 
-export function Host(props: HostProps) {
+export function Host(attrs: HostProps) {
   const ctor = $$_current_host_component?.constructor as ComponentConstructor | undefined;
 
   if (__DEV__ && !$$_current_host_component) {
@@ -28,68 +28,70 @@ export function Host(props: HostProps) {
     );
   }
 
-  if (!$$_current_host_component || !ctor) return null;
+  if (!ctor) return null;
 
-  const isCustomElement = DEFINE_ELEMENT_SYMBOL in ctor,
-    host = createHostElement(ctor, isCustomElement)!,
-    slots = getSlots();
+  const tagName = ctor.element!.fallbackTag,
+    ref = $$_ref(),
+    props: Record<string, any> = {
+      [$$_suppress_hydration_warning]: true,
+      ref: ref.set,
+    },
+    slots = getSlots(),
+    children = slots.default?.() as ReactNode;
 
-  if (slots.default) {
-    let target: Node = host,
-      shadowRoot = ctor.element?.shadowRoot;
+  if ($$_IS_SERVER) {
+    const host = new ServerElement(tagName, $$_current_host_component!);
 
-    if (shadowRoot) {
-      if (hydration) attachDeclarativeShadowDOM(host);
-      target = host.shadowRoot ?? attachShadow(host, shadowRoot);
+    const style = attrs.style ?? attrs.$style;
+    if (style) {
+      const value = unwrapDeep(style);
+      if (isString(value)) host.style.parse(value, kebabToCamelCase);
+      delete attrs.style;
+      delete attrs.$style;
     }
 
-    if (hydration && shadowRoot) {
-      hydrate(slots.default, { target });
-    } else {
-      insert(target, slots.default());
+    for (const prop of Object.keys(attrs)) {
+      const name = prop.replace($$_signal_name_re, ''),
+        value = unwrapDeep(attrs[name]);
+      setAttribute(host as unknown as HTMLElement, name, value);
     }
-  }
 
-  for (const name of Object.keys(props)) {
-    $$_attr(host, name.replace($$_signal_name_re, ''), props[name]);
-  }
+    $$_current_host_component!.$$.attach(host as unknown as HTMLElement);
 
-  $$_current_host_component.$$.attach(host);
+    if (host.classList.length > 0) {
+      props.className = host.classList.toString();
+    }
 
-  connectToHost.bind($$_current_host_component);
+    if (host.style.length > 0) {
+      props.style = Object.fromEntries(host.style.tokens);
+    }
 
-  return host;
-}
-
-function connectToHost(this: AnyComponent) {
-  requestAnimationFrame(() => this.$$.connect());
-}
-
-function createHostElement(Component: ComponentConstructor, isCustomElement: boolean) {
-  const options = Component.element;
-
-  if (isCustomElement) {
-    Component[DEFINE_ELEMENT_SYMBOL]!();
-
-    if (hydration) {
-      const el = $$_next_element<MaverickCustomElement>(hydration.w);
-
-      if (!el.$) {
-        // @ts-expect-error - override readonly
-        el.$ = $$_current_host_component;
+    for (const [name, value] of host.attributes.tokens.entries()) {
+      const propName = attrsToProps[name] ?? name;
+      props[propName] = value;
+    }
+  } else {
+    const component = $$_current_host_component!;
+    $$_on_attach(ref, (el) => {
+      for (const prop of Object.keys(attrs)) {
+        const name = prop.replace($$_signal_name_re, '');
+        $$_attr(el, name, attrs[name]);
       }
 
-      return el;
-    } else {
-      const el = document.createElement(options!.name);
-      el.setAttribute('data-maverick', '');
-      return el;
-    }
-  } else if (options) {
-    return hydration
-      ? $$_next_element<HTMLElement>(hydration.w)
-      : (document.createElement(options.fallbackTag) as HTMLElement);
+      component.$$.attach(el);
+      const connectId = requestAnimationFrame(connect.bind(component));
+
+      return () => {
+        cancelAnimationFrame(connectId);
+        component.$$.disconnect();
+        component.$$.detach();
+      };
+    });
   }
 
-  return null;
+  return createElement(tagName, props, children);
+}
+
+function connect(this: AnyComponent) {
+  this.$$.connect();
 }

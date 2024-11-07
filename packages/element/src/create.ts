@@ -259,7 +259,6 @@ export function createElementClass<T extends Component>(
       this.connectedCallback();
     }
 
-    // @ts-expect-error
     subscribe(callback: (state: any) => void) {
       return this.$.subscribe(callback);
     }

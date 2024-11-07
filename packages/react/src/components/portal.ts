@@ -1,38 +1,32 @@
-import {
-  computed,
-  effect,
-  getSlots,
-  type JSX,
-  onDispose,
-  type PortalProps,
-  type PortalTarget,
-} from '@maverick-js/core';
+import { computed, getSlots, type PortalProps, type PortalTarget } from '@maverick-js/core';
 import { isFunction, isString } from '@maverick-js/std';
+import { createElement, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
-import { insert } from '../insert';
+import { useSignal } from '../hooks/use-signal';
+import { $$_IS_SERVER } from '../runtime';
 
 export function Portal({ to }: PortalProps) {
-  const slots = getSlots();
-  if (isFunction(to)) {
-    const target = computed(() => getTarget(to()));
-    effect(() => portal(target(), slots.default?.()));
+  const slots = getSlots(),
+    children = slots.default?.() as ReactNode;
+
+  if ($$_IS_SERVER) {
+    return null;
+  } else if (isFunction(to)) {
+    const $target = computed(() => getContainer(to()));
+    return createElement(() => {
+      const container = useSignal($target);
+      return portal(container, children);
+    });
   } else {
-    portal(getTarget(to), slots.default?.());
+    return portal(getContainer(to), children);
   }
 }
 
-function getTarget(target: PortalTarget) {
-  return isString(target) ? document.querySelector(target) : target;
+function portal(container: Element | null, children: ReactNode) {
+  return container ? createPortal(children, container) : null;
 }
 
-function portal(target: Node | null, children: JSX.Element) {
-  if (!target) return;
-
-  const root = document.createElement('div');
-  root.style.display = 'contents';
-  root.setAttribute('data-portal', '');
-  insert(root, children, null);
-
-  target.appendChild(root);
-  onDispose(() => void target.removeChild(root));
+function getContainer(target: PortalTarget) {
+  return isString(target) ? document.querySelector(target) : target;
 }

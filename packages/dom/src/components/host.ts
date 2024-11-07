@@ -28,7 +28,7 @@ export function Host(props: HostProps) {
     );
   }
 
-  if (!$$_current_host_component || !ctor) return null;
+  if (!ctor) return null;
 
   const isCustomElement = DEFINE_ELEMENT_SYMBOL in ctor,
     host = createHostElement(ctor, isCustomElement)!,
@@ -54,15 +54,15 @@ export function Host(props: HostProps) {
     $$_attr(host, name.replace($$_signal_name_re, ''), props[name]);
   }
 
-  $$_current_host_component.$$.attach(host);
+  $$_current_host_component!.$$.attach(host);
 
-  connectToHost.bind($$_current_host_component);
+  requestAnimationFrame(connect.bind($$_current_host_component!));
 
   return host;
 }
 
-function connectToHost(this: AnyComponent) {
-  requestAnimationFrame(() => this.$$.connect());
+function connect(this: AnyComponent) {
+  this.$$.connect();
 }
 
 function createHostElement(Component: ComponentConstructor, isCustomElement: boolean) {

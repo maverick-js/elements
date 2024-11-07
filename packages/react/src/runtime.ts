@@ -16,17 +16,23 @@ import {
   signal,
   type Slot,
   type SlotRecord,
+  type WriteSignal,
 } from '@maverick-js/core';
 import { $$_signal_name_re } from '@maverick-js/dom';
 import { $$_class as $$_ssr_class, ServerStyleDeclaration } from '@maverick-js/ssr';
 import { isFunction, kebabToCamelCase, unwrapDeep } from '@maverick-js/std';
-import { createElement } from 'react';
+import { createElement, type ReactElement } from 'react';
 
 import { attrsToProps } from './attrs-map';
 import { useSignal } from './hooks/use-signal';
 
 /** @internal */
-export const $$_REACT_ELEMENT_TYPE = Symbol.for('react.element');
+export const $$_react_element_type = Symbol.for('react.element');
+
+/** @internal */
+export function $$_is_react_element(node: unknown): node is ReactElement {
+  return !!node && typeof node === 'object' && (node as any).$$typeof === $$_react_element_type;
+}
 
 /** @internal */
 export let $$_IS_CLIENT = false;
@@ -50,26 +56,26 @@ export const $$_h = createElement;
 /** @internal */
 export const $$_suppress_hydration_warning = 'suppressHydrationWarning';
 
-const noop_ref = { set: null };
+const serverRef = { set: null } as unknown as WriteSignal<HTMLElement | null>;
 
 /** @internal */
 export function $$_ref() {
   if ($$_IS_SERVER) {
-    return noop_ref;
+    return serverRef;
   } else {
-    return signal(null);
+    return signal<HTMLElement | null>(null);
   }
 }
 
 /** @internal */
 export function $$_on_attach(
   ref: ReadSignal<HTMLElement | null>,
-  callback: (el: HTMLElement) => void,
+  callback: (el: HTMLElement) => any,
 ) {
   if ($$_IS_SERVER) return;
   effect(() => {
     let el = ref();
-    if (el) callback(el);
+    if (el) return callback(el);
   });
 }
 
@@ -184,17 +190,17 @@ export function $$_ssr_spread(props: Record<string, any>) {
   }
 
   if (baseStyle || $style) {
-    ssrProps.style = $$_style(baseStyle, $style);
+    ssrProps.style = $$_ssr_style(baseStyle, $style);
   }
 
   return ssrProps;
 }
 
 /** @internal */
-export function $$_style(base: string, props?: Record<string, unknown> | null) {
+export function $$_ssr_style(base: string, props?: Record<string, unknown> | null) {
   const style = new ServerStyleDeclaration();
 
-  style.parse(base, kebabToCamelCase);
+  if (base) style.parse(base, kebabToCamelCase);
 
   if (props) {
     for (const prop of Object.keys(props)) {
@@ -207,5 +213,5 @@ export function $$_style(base: string, props?: Record<string, unknown> | null) {
     }
   }
 
-  return Object.entries(style.tokens);
+  return Object.fromEntries(style.tokens);
 }

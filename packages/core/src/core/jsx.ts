@@ -51,7 +51,7 @@ export function Fragment(props: FragmentProps): JSX.Element {
 // <Portal>
 // ---------------------------------------------------------------------------------------------
 
-export type PortalTarget = Node | string | null;
+export type PortalTarget = Element | string | null;
 
 export interface PortalProps {
   to: SignalOrValue<PortalTarget>;
@@ -116,7 +116,7 @@ export interface ForKeyedDefaultSlot<Item = unknown> {
 }
 
 export interface ForKeyedProps<Item = unknown> {
-  key: (item: Item) => string | number;
+  key: (item: Item) => string | number | null;
   each: Maybe<Item[] | ReadSignal<Item[]>>;
   children: ForKeyedDefaultSlot<Item>;
 }

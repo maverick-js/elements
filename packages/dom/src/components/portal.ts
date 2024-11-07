@@ -12,20 +12,18 @@ import { isFunction, isString } from '@maverick-js/std';
 import { insert } from '../insert';
 
 export function Portal({ to }: PortalProps) {
-  const slots = getSlots();
+  const slots = getSlots(),
+    children = slots.default?.();
+
   if (isFunction(to)) {
-    const target = computed(() => getTarget(to()));
-    effect(() => portal(target(), slots.default?.()));
+    const $container = computed(() => getContainer(to()));
+    effect(() => portal($container(), children));
   } else {
-    portal(getTarget(to), slots.default?.());
+    portal(getContainer(to), children);
   }
 }
 
-function getTarget(target: PortalTarget) {
-  return isString(target) ? document.querySelector(target) : target;
-}
-
-function portal(target: Node | null, children: JSX.Element) {
+function portal(target: Element | null, children: JSX.Element) {
   if (!target) return;
 
   const root = document.createElement('div');
@@ -35,4 +33,8 @@ function portal(target: Node | null, children: JSX.Element) {
 
   target.appendChild(root);
   onDispose(() => void target.removeChild(root));
+}
+
+function getContainer(target: PortalTarget) {
+  return isString(target) ? document.querySelector(target) : target;
 }

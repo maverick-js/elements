@@ -48,11 +48,11 @@ function Foo() {
   return <svg var:foo={getFoo()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_style("", {
+            style: $$_ssr_style("", {
                 "--foo": getFoo()
             })
         } : null, $_ref_1 = $$_ref();
@@ -79,11 +79,11 @@ function Foo() {
   return <svg var:foo={getFoo()} var:bar={getBar()} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_style("", {
+            style: $$_ssr_style("", {
                 "--foo": getFoo(),
                 "--bar": getBar()
             })
@@ -112,11 +112,11 @@ function Foo() {
   return <svg $var:foo={foo} />
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_style("", {
+            style: $$_ssr_style("", {
                 "--foo": foo
             })
         } : null, $_ref_1 = $$_ref();
@@ -143,11 +143,11 @@ function Foo() {
   return <svg $var:foo={foo} $var:bar={bar}/>
 }`),
   ).toMatchInlineSnapshot(`
-    "import { $$_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
+    "import { $$_ssr_style, $$_IS_SERVER, $$_suppress_hydration_warning, $$_ref, $$_on_attach, $$_IS_CLIENT, $$_h } from "@maverick-js/react";
     import { $$_style } from "@maverick-js/dom";
     function Foo() {
         let $_ssr_attrs_1 = $$_IS_SERVER ? {
-            style: $$_style("", {
+            style: $$_ssr_style("", {
                 "--foo": foo,
                 "--bar": bar
             })

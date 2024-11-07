@@ -34,32 +34,32 @@ export function Host({ style, $style, ...props }: HostProps) {
 
   const isCustomElement = DEFINE_ELEMENT_SYMBOL in ctor,
     tagName = isCustomElement ? ctor.element.name : ctor.element.fallbackTag,
-    $$host = new ServerElement(tagName, $$_current_host_component),
+    host = new ServerElement(tagName, $$_current_host_component),
     shadowRoot = ctor.element.shadowRoot,
     slots = getSlots();
 
   if (style || $style) {
     const value = style ?? unwrapDeep($style);
-    if (isString(value)) $$host.style.parse(value);
+    if (isString(value)) host.style.parse(value);
   }
 
   for (const name of Object.keys(props)) {
     const value = unwrapDeep(props[name]);
-    setAttribute($$host as unknown as HTMLElement, name.replace($$_signal_name_re, ''), value);
+    setAttribute(host as unknown as HTMLElement, name.replace($$_signal_name_re, ''), value);
   }
 
-  $$host.setAttribute('data-maverick', '');
+  host.setAttribute('data-maverick', '');
 
-  $$_current_host_component.$$.attach($$host as unknown as HTMLElement);
+  $$_current_host_component!.$$.attach(host as unknown as HTMLElement);
 
-  let attrs = $$host.attributes.toString();
+  let stuff = host.attributes.toString();
 
-  if ($$host.classList.length > 0) {
-    attrs += ` class="${$$host.classList.toString()}"`;
+  if (host.classList.length > 0) {
+    stuff += ` class="${host.classList.toString()}"`;
   }
 
-  if ($$host.style.length > 0) {
-    attrs += ` style="${$$host.style.toString()}"`;
+  if (host.style.length > 0) {
+    stuff += ` style="${host.style.toString()}"`;
   }
 
   const slotted = $$_unwrap_slot(slots.default?.()) ?? '',
@@ -67,5 +67,5 @@ export function Host({ style, $style, ...props }: HostProps) {
       ? `<template shadowrootmode="${getShadowRootMode(shadowRoot)}">${slotted}</template>`
       : slotted;
 
-  return `<!$><${tagName}${attrs}>${children}</${tagName}>`;
+  return `<!$><${tagName}${stuff}>${children}</${tagName}>`;
 }

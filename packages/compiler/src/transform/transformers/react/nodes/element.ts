@@ -258,7 +258,7 @@ export function getSsrProps(node: ElementNode, { runtime, ssrRuntime }: ReactTra
       ),
       styleProps =
         $styleProps || $varProps
-          ? runtime.style(base, [...($styleProps ?? []), ...($varProps ?? [])])
+          ? runtime.ssrStyle(base, [...($styleProps ?? []), ...($varProps ?? [])])
           : base;
 
     props.push($.createPropertyAssignment('style', styleProps));
@@ -266,7 +266,7 @@ export function getSsrProps(node: ElementNode, { runtime, ssrRuntime }: ReactTra
     const value = stylesNode.signal
       ? ssrRuntime.unwrap(stylesNode.initializer)
       : stylesNode.initializer;
-    props.push($.createPropertyAssignment('style', runtime.style(value, [])));
+    props.push($.createPropertyAssignment('style', runtime.ssrStyle(value, [])));
   }
 
   if (node.content && node.content.signal) {

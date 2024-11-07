@@ -12,12 +12,13 @@ import { isFunction, unwrapDeep } from '@maverick-js/std';
 import { createElement, type ReactNode } from 'react';
 
 import { useSignal } from '../hooks/use-signal';
-import { $$_IS_SERVER, $$_REACT_ELEMENT_TYPE } from '../runtime';
+import { $$_is_react_element, $$_IS_SERVER } from '../runtime';
 
 export function For<Item = unknown>({ each }: ForProps<Item>) {
   if ($$_IS_SERVER) {
     const slots = getSlots<ForSlots>(),
       map = slots.default ? (item, index) => slots.default!(() => item, index) : null;
+
     return ssr({ each, map });
   } else {
     const slots = getSlots<ForSlots>(),
@@ -26,8 +27,8 @@ export function For<Item = unknown>({ each }: ForProps<Item>) {
     if (!map) {
       return null;
     } else if (isFunction(each)) {
-      const list = computedMap(each, map);
-      return createElement(() => useSignal(list) as ReactNode[]);
+      const $list = computedMap(each, map);
+      return createElement(() => useSignal($list) as ReactNode[]);
     } else if (each) {
       return each.map((item, index) => map(staticSignal.bind(item), index));
     } else {
@@ -40,24 +41,21 @@ export function ForKeyed<Item = unknown>({ each, key }: ForKeyedProps<Item>) {
   if ($$_IS_SERVER) {
     const slots = getSlots<ForKeyedSlots>(),
       map = slots.default ? (item, index) => slots.default!(item, () => index) : null;
+
     return ssr({ each, map, key });
   } else {
     const slots = getSlots<ForKeyedSlots>(),
       map = slots.default;
+
     if (!map) {
       return null;
     } else if (isFunction(each)) {
-      const list = computedKeyedMap(each, (item, index) => {
+      const $list = computedKeyedMap(each, (item, index) => {
         const node = map(item, index) as any;
-
-        if (node && typeof node === 'object' && node.$$typeof === $$_REACT_ELEMENT_TYPE) {
-          return { ...node, key: key(item) };
-        }
-
-        return node;
+        return $$_is_react_element(node) ? { ...node, key: key(item) } : node;
       });
 
-      return createElement(() => useSignal(list) as ReactNode[]);
+      return createElement(() => useSignal($list));
     } else if (each) {
       return each.map((item, index) => map(item, staticSignal.bind(index)));
     } else {
@@ -84,8 +82,8 @@ function ssr<Item>({
     let item = list[i],
       node = map(item, i);
 
-    if (key && node && node.$$typeof === $$_REACT_ELEMENT_TYPE) {
-      node = { ...node, key: key(item, i) };
+    if (key && $$_is_react_element(node)) {
+      node = { ...node, key: key(item) };
     }
 
     result.push(node);

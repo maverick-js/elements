@@ -124,8 +124,8 @@ export class ReactRuntime extends Runtime {
     return this.call('append_html', [html]);
   }
 
-  style(base: ts.Expression, props: ts.ObjectLiteralElementLike[]) {
-    return this.call('style', [base, $.object(props, true)]);
+  ssrStyle(base: ts.Expression, props: ts.ObjectLiteralElementLike[]) {
+    return this.call('ssr_style', [base, $.object(props, true)]);
   }
 
   ssrSpread(props: ts.Expression) {
